@@ -1,0 +1,29 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <style class="button" padding="5" radius="18" corners="round" fill="transparent" hover.fill="#8080802E"
+         scale="1" pressed.scale="0.86" transition="spring"/>
+  <column padding="14 14 8 14" gap="3" width="fill" height="fill">
+    <stack width="50" height="50" shadow="0 2 8 #00000030">
+      <rect if="!app.art" width="fill" height="fill" radius="9" fill="linear(160deg, #FFFFFF38, #FFFFFF1A)"/>
+      <image if="!app.art" src="assets/note.svg" width="24" height="24" opacity="0.7"/>
+      <image if="app.art" src="{app.art}" width="50" height="50" radius="9"/>
+    </stack>
+    <spacer grow="1"/>
+    <text if="app.source" value="{app.title}" size="14" weight="600" ellipsis="true" width="fill"/>
+    <text if="!app.source" value="{app.title}" size="14" weight="500" color="secondary" ellipsis="true" width="fill"/>
+    <text value="{app.artist}" size="12" color="secondary" ellipsis="true" width="fill"/>
+    <spacer height="1"/>
+    <image drag="seek" src="assets/progress.svg" hover.src="assets/progress-hover.svg" pressed.src="assets/progress-drag.svg" width="fill" height="10" opacity="{app.controls}"/>
+    <row justify="center" align="center" gap="6" width="fill" opacity="{app.controls}">
+      <stack class="button" action="previous">
+        <image src="assets/backward.svg" width="20" height="20"/>
+      </stack>
+      <stack class="button" action="playpause">
+        <image if="app.playing" src="assets/pause.svg" width="24" height="24"/>
+        <image if="!app.playing" src="assets/play.svg" width="24" height="24"/>
+      </stack>
+      <stack class="button" action="next">
+        <image src="assets/forward.svg" width="20" height="20"/>
+      </stack>
+    </row>
+  </column>
+</widget>

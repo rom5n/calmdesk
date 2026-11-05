@@ -1,0 +1,64 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.media-square"
+name = "Now Playing"
+variant = "Square"
+category = "Media"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "glass"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "shape", "font"]
+
+[strings.ru]
+"Now Playing" = "Сейчас играет"
+"Square" = "Квадратный"
+
+[strings.uk]
+"Now Playing" = "Зараз грає"
+"Square" = "Квадратний"
+
+[strings.de]
+"Now Playing" = "Wiedergabe"
+"Square" = "Quadratisch"
+
+[strings.fr]
+"Now Playing" = "En cours de lecture"
+"Square" = "Carré"
+
+[strings.es]
+"Now Playing" = "Reproduciendo"
+"Square" = "Cuadrado"
+
+[strings.it]
+"Now Playing" = "In riproduzione"
+"Square" = "Quadrato"
+
+[strings.pt]
+"Now Playing" = "Tocando agora"
+"Square" = "Quadrado"
+
+[strings.pl]
+"Now Playing" = "Teraz odtwarzane"
+"Square" = "Kwadratowy"
+
+[strings.zh]
+"Now Playing" = "正在播放"
+"Square" = "方形"
+
+[strings.ja]
+"Now Playing" = "再生中"
+"Square" = "正方形"
+
+[strings.ko]
+"Now Playing" = "지금 재생 중"
+"Square" = "정사각형"

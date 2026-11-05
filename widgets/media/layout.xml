@@ -1,0 +1,42 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- Round transport buttons: a faint disc on hover, a spring press. -->
+  <style class="button" padding="7" radius="22" corners="round" fill="transparent" hover.fill="#8080802E"
+         scale="1" pressed.scale="0.86" transition="spring"/>
+  <column padding="16 18 12 18" gap="10">
+    <row gap="14" align="center" width="fill">
+      <!-- Artwork from the app ({app.art} is a file path), or a translucent tile with a note. -->
+      <stack width="68" height="68" shadow="0 2 8 #00000030">
+        <rect if="!app.art" width="fill" height="fill" radius="10" fill="linear(160deg, #FFFFFF38, #FFFFFF1A)"/>
+        <image if="!app.art" src="assets/note.svg" width="30" height="30" opacity="0.7"/>
+        <image if="app.art" src="{app.art}" width="68" height="68" radius="10"/>
+      </stack>
+      <column grow="1" gap="1">
+        <text if="app.source" value="{app.title}" size="15" weight="600" tracking="-0.2" ellipsis="true" width="fill"/>
+        <text if="!app.source" value="{app.title}" size="15" weight="500" color="secondary" ellipsis="true" width="fill"/>
+        <text value="{app.artist}" size="13" weight="400" color="secondary" ellipsis="true" width="fill"/>
+      </column>
+    </row>
+    <!-- Dim like the buttons when nothing plays. Drag the bar to seek: the app gets seek:<0-1>. -->
+    <column opacity="{app.controls}" gap="1" width="fill">
+      <!-- app.bar: percent played, 0 without a track length. -->
+      <image drag="seek" src="assets/progress.svg" hover.src="assets/progress-hover.svg" pressed.src="assets/progress-drag.svg" width="fill" height="10"/>
+      <row width="fill">
+        <text value="{app.elapsed}" size="11" weight="500" color="secondary" features="tnum"/>
+        <spacer grow="1"/>
+        <text value="{app.remaining}" size="11" weight="500" color="secondary" features="tnum"/>
+      </row>
+    </column>
+    <row justify="center" align="center" gap="20" width="fill" opacity="{app.controls}">
+      <stack class="button" action="previous">
+        <image src="assets/backward.svg" width="24" height="24"/>
+      </stack>
+      <stack class="button" action="playpause">
+        <image if="app.playing" src="assets/pause.svg" width="30" height="30"/>
+        <image if="!app.playing" src="assets/play.svg" width="30" height="30"/>
+      </stack>
+      <stack class="button" action="next">
+        <image src="assets/forward.svg" width="24" height="24"/>
+      </stack>
+    </row>
+  </column>
+</widget>

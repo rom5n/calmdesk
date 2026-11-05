@@ -1,0 +1,15 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <column padding="14 16 12 16" gap="4" width="fill" height="fill">
+    <text value="{str.Screen time}" size="12" weight="600" color="secondary" ellipsis="true" width="fill"/>
+    <text if="app.hours" fit="true" value="{app.hours} {str.h} {app.mins} {str.min}" size="24" weight="700" features="tnum"/>
+    <text if="!app.hours" fit="true" value="{app.mins} {str.min}" size="24" weight="700" features="tnum"/>
+    <spacer grow="1"/>
+    <image src="assets/bars.svg" width="138" height="44"/>
+    <row width="fill">
+      <text value="0" size="9" color="secondary" width="34.5"/>
+      <text value="6" size="9" color="secondary" width="34.5"/>
+      <text value="12" size="9" color="secondary" width="34.5"/>
+      <text value="18" size="9" color="secondary" width="34.5"/>
+    </row>
+  </column>
+</widget>

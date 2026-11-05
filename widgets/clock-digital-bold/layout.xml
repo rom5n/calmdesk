@@ -1,0 +1,6 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <column width="fill" height="fill" align="center" justify="center">
+    <text fit="true" value="{clock.hour}" size="60" weight="800" features="tnum" tracking="-2"/>
+    <text fit="true" value="{clock.minute}" size="60" weight="800" features="tnum" tracking="-2" color="accent"/>
+  </column>
+</widget>

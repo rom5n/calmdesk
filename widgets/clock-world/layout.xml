@@ -1,0 +1,54 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- The app sets the hands (app.a0, app.m0), city (app.n0), day (app.d0) and offset (app.o0). -->
+  <style class="hand" shadow="0 0 2 #00000050"/>
+  <row padding="16 10 12 10" width="fill" height="fill">
+    <column grow="1" align="center" gap="1">
+      <stack width="66" height="66">
+        <image src="assets/dial.svg" width="fill" height="fill"/>
+        <image class="hand" src="assets/hand-hour.svg" width="fill" height="fill" rotate="{app.a0}"/>
+        <image class="hand" src="assets/hand-minute.svg" width="fill" height="fill" rotate="{app.m0}"/>
+        <image class="hand" src="assets/hand-second.svg" width="fill" height="fill" rotate="{clock.second_angle}" spin="6"/>
+      </stack>
+      <spacer height="5"/>
+      <text value="{app.n0}" size="12" weight="600" ellipsis="true" text-align="center" width="fill"/>
+      <text value="{app.d0}" size="11" color="secondary" ellipsis="true" text-align="center" width="fill"/>
+      <text value="{app.o0}" size="11" color="secondary" features="tnum"/>
+    </column>
+    <column grow="1" align="center" gap="1">
+      <stack width="66" height="66">
+        <image src="assets/dial.svg" width="fill" height="fill"/>
+        <image class="hand" src="assets/hand-hour.svg" width="fill" height="fill" rotate="{app.a1}"/>
+        <image class="hand" src="assets/hand-minute.svg" width="fill" height="fill" rotate="{app.m1}"/>
+        <image class="hand" src="assets/hand-second.svg" width="fill" height="fill" rotate="{clock.second_angle}" spin="6"/>
+      </stack>
+      <spacer height="5"/>
+      <text value="{app.n1}" size="12" weight="600" ellipsis="true" text-align="center" width="fill"/>
+      <text value="{app.d1}" size="11" color="secondary" ellipsis="true" text-align="center" width="fill"/>
+      <text value="{app.o1}" size="11" color="secondary" features="tnum"/>
+    </column>
+    <column grow="1" align="center" gap="1">
+      <stack width="66" height="66">
+        <image src="assets/dial.svg" width="fill" height="fill"/>
+        <image class="hand" src="assets/hand-hour.svg" width="fill" height="fill" rotate="{app.a2}"/>
+        <image class="hand" src="assets/hand-minute.svg" width="fill" height="fill" rotate="{app.m2}"/>
+        <image class="hand" src="assets/hand-second.svg" width="fill" height="fill" rotate="{clock.second_angle}" spin="6"/>
+      </stack>
+      <spacer height="5"/>
+      <text value="{app.n2}" size="12" weight="600" ellipsis="true" text-align="center" width="fill"/>
+      <text value="{app.d2}" size="11" color="secondary" ellipsis="true" text-align="center" width="fill"/>
+      <text value="{app.o2}" size="11" color="secondary" features="tnum"/>
+    </column>
+    <column grow="1" align="center" gap="1">
+      <stack width="66" height="66">
+        <image src="assets/dial.svg" width="fill" height="fill"/>
+        <image class="hand" src="assets/hand-hour.svg" width="fill" height="fill" rotate="{app.a3}"/>
+        <image class="hand" src="assets/hand-minute.svg" width="fill" height="fill" rotate="{app.m3}"/>
+        <image class="hand" src="assets/hand-second.svg" width="fill" height="fill" rotate="{clock.second_angle}" spin="6"/>
+      </stack>
+      <spacer height="5"/>
+      <text value="{app.n3}" size="12" weight="600" ellipsis="true" text-align="center" width="fill"/>
+      <text value="{app.d3}" size="11" color="secondary" ellipsis="true" text-align="center" width="fill"/>
+      <text value="{app.o3}" size="11" color="secondary" features="tnum"/>
+    </column>
+  </row>
+</widget>

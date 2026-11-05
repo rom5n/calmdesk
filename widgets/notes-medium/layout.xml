@@ -1,0 +1,11 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- The note is a text file the title opens in Notepad. -->
+  <column padding="14 16 16 16" gap="8" width="fill" height="fill">
+    <row gap="7" align="center" action="edit" scale="1" pressed.scale="0.95" transition="spring">
+      <image src="assets/notes.svg" width="20" height="20"/>
+      <text value="{str.Notes}" size="14" weight="700" color="#E3A600"/>
+    </row>
+    <text if="app.text" value="{app.text}" size="14" width="fill"/>
+    <text if="!app.text" value="{str.Click the title to write a note}" size="13" color="secondary" width="fill"/>
+  </column>
+</widget>

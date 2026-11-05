@@ -1,0 +1,6 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- No card: dark digits with a light rim sit on the wallpaper. -->
+  <column width="fill" height="fill" align="center" justify="center">
+    <text fit="true" value="{clock.time}" size="118" weight="800" features="tnum" color="#3A3A3C" shadow="0 3 12 #00000050, 1.6 0 0 #B4B4B8, -1.6 0 0 #B4B4B8, 0 1.6 0 #B4B4B8, 0 -1.6 0 #B4B4B8, 1.1 1.1 0 #B4B4B8, -1.1 1.1 0 #B4B4B8, 1.1 -1.1 0 #B4B4B8, -1.1 -1.1 0 #B4B4B8"/>
+  </column>
+</widget>

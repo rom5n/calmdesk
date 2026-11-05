@@ -1,0 +1,52 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.stopwatch"
+name = "Stopwatch"
+category = "Time"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 600
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Stopwatch" = "Секундомер"
+
+[strings.uk]
+"Stopwatch" = "Секундомір"
+
+[strings.de]
+"Stopwatch" = "Stoppuhr"
+
+[strings.fr]
+"Stopwatch" = "Chronomètre"
+
+[strings.es]
+"Stopwatch" = "Cronómetro"
+
+[strings.it]
+"Stopwatch" = "Cronometro"
+
+[strings.pt]
+"Stopwatch" = "Cronômetro"
+
+[strings.pl]
+"Stopwatch" = "Stoper"
+
+[strings.zh]
+"Stopwatch" = "秒表"
+
+[strings.ja]
+"Stopwatch" = "ストップウォッチ"
+
+[strings.ko]
+"Stopwatch" = "스톱워치"

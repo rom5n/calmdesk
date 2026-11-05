@@ -1,0 +1,19 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- The photo picked in the menu; else one from the folder picked there, a new one every
+       15 minutes (the app picks it); else how to pick one. -->
+  <stack width="fill" height="fill">
+    <image if="opt.photo" src="{opt.photo}" width="fill" height="fill" radius="85" corners="round"/>
+    <stack if="!opt.photo" width="fill" height="fill">
+      <image if="app.photo" src="{app.photo}" width="fill" height="fill" radius="85" corners="round"/>
+      <column if="!app.photo" width="fill" align="center" gap="5" padding="0 26">
+        <stack width="42" height="42">
+          <ellipse width="fill" height="fill" fill="accent"/>
+          <image src="assets/photo.svg" width="22" height="22"/>
+        </stack>
+        <spacer height="3"/>
+        <text value="{str.Add a photo}" size="15" weight="600" color="foreground" text-align="center" width="fill"/>
+        <text value="{str.Right-click, then Photo or Folder}" size="12" color="secondary" text-align="center" width="fill"/>
+      </column>
+    </stack>
+  </stack>
+</widget>

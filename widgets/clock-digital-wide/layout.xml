@@ -1,0 +1,10 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <row padding="20 24" width="fill" height="fill" align="center" gap="18">
+    <text fit="true" value="{clock.time}" size="70" weight="300" features="tnum" tracking="-2" grow="1"/>
+    <column align="end">
+      <text value="{clock.weekday}" size="15" weight="600" color="accent"/>
+      <text value="{clock.day}" size="40" weight="700"/>
+      <text value="{clock.month}" size="14" color="secondary"/>
+    </column>
+  </row>
+</widget>

@@ -1,0 +1,20 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- Time this PC was in use today (input in the last 5 minutes), counted by the app. -->
+  <column padding="14 18 12 18" gap="6" width="fill" height="fill">
+    <row width="fill" align="end">
+      <column grow="1">
+        <text value="{str.Screen time}" size="13" weight="600" color="secondary"/>
+        <text if="app.hours" value="{app.hours} {str.h} {app.mins} {str.min}" size="28" weight="700" features="tnum"/>
+        <text if="!app.hours" value="{app.mins} {str.min}" size="28" weight="700" features="tnum"/>
+      </column>
+      <text value="{str.Today}" size="12" color="secondary"/>
+    </row>
+    <image src="assets/bars.svg" width="316" height="56"/>
+    <row width="fill">
+      <text value="0" size="10" color="secondary" width="79"/>
+      <text value="6" size="10" color="secondary" width="79"/>
+      <text value="12" size="10" color="secondary" width="79"/>
+      <text value="18" size="10" color="secondary" width="79"/>
+    </row>
+  </column>
+</widget>

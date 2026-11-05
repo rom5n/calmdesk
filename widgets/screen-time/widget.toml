@@ -1,0 +1,85 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.screen-time"
+name = "Screen time"
+category = "System"
+engine = "^0.1"
+size = [352, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Screen time" = "Экранное время"
+"h" = "ч"
+"min" = "мин"
+"Today" = "Сегодня"
+
+[strings.uk]
+"Screen time" = "Екранний час"
+"h" = "год"
+"min" = "хв"
+"Today" = "Сьогодні"
+
+[strings.de]
+"Screen time" = "Bildschirmzeit"
+"h" = "Std."
+"min" = "Min."
+"Today" = "Heute"
+
+[strings.fr]
+"Screen time" = "Temps d’écran"
+"h" = "h"
+"min" = "min"
+"Today" = "Aujourd’hui"
+
+[strings.es]
+"Screen time" = "Tiempo de pantalla"
+"h" = "h"
+"min" = "min"
+"Today" = "Hoy"
+
+[strings.it]
+"Screen time" = "Tempo di utilizzo"
+"h" = "h"
+"min" = "min"
+"Today" = "Oggi"
+
+[strings.pt]
+"Screen time" = "Tempo de tela"
+"h" = "h"
+"min" = "min"
+"Today" = "Hoje"
+
+[strings.pl]
+"Screen time" = "Czas przed ekranem"
+"h" = "godz."
+"min" = "min"
+"Today" = "Dziś"
+
+[strings.zh]
+"Screen time" = "屏幕使用时间"
+"h" = "小时"
+"min" = "分钟"
+"Today" = "今天"
+
+[strings.ja]
+"Screen time" = "スクリーンタイム"
+"h" = "時間"
+"min" = "分"
+"Today" = "今日"
+
+[strings.ko]
+"Screen time" = "스크린 타임"
+"h" = "시간"
+"min" = "분"
+"Today" = "오늘"

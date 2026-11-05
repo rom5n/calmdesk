@@ -1,0 +1,74 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.energy-saver"
+name = "Energy saver"
+category = "System"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Energy saver" = "Экономия энергии"
+"On" = "Вкл."
+"Off" = "Выкл."
+
+[strings.uk]
+"Energy saver" = "Економія енергії"
+"On" = "Увімк."
+"Off" = "Вимк."
+
+[strings.de]
+"Energy saver" = "Energiesparen"
+"On" = "Ein"
+"Off" = "Aus"
+
+[strings.fr]
+"Energy saver" = "Économiseur d’énergie"
+"On" = "Activé"
+"Off" = "Désactivé"
+
+[strings.es]
+"Energy saver" = "Ahorro de energía"
+"On" = "Activado"
+"Off" = "Desactivado"
+
+[strings.it]
+"Energy saver" = "Risparmio energia"
+"On" = "Attivo"
+"Off" = "Disattivo"
+
+[strings.pt]
+"Energy saver" = "Economia de energia"
+"On" = "Ativado"
+"Off" = "Desativado"
+
+[strings.pl]
+"Energy saver" = "Oszczędzanie energii"
+"On" = "Wł."
+"Off" = "Wył."
+
+[strings.zh]
+"Energy saver" = "节能模式"
+"On" = "开"
+"Off" = "关"
+
+[strings.ja]
+"Energy saver" = "省エネ"
+"On" = "オン"
+"Off" = "オフ"
+
+[strings.ko]
+"Energy saver" = "에너지 절약"
+"On" = "켬"
+"Off" = "끔"

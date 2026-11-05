@@ -1,0 +1,64 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.clock-analog-classic"
+name = "Dial"
+variant = "Classic"
+category = "Time"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Dial" = "Циферблат"
+"Classic" = "Классический"
+
+[strings.uk]
+"Dial" = "Циферблат"
+"Classic" = "Класичний"
+
+[strings.de]
+"Dial" = "Zifferblatt"
+"Classic" = "Klassisch"
+
+[strings.fr]
+"Dial" = "Cadran"
+"Classic" = "Classique"
+
+[strings.es]
+"Dial" = "Esfera"
+"Classic" = "Clásico"
+
+[strings.it]
+"Dial" = "Quadrante"
+"Classic" = "Classico"
+
+[strings.pt]
+"Dial" = "Mostrador"
+"Classic" = "Clássico"
+
+[strings.pl]
+"Dial" = "Tarcza"
+"Classic" = "Klasyczny"
+
+[strings.zh]
+"Dial" = "表盘"
+"Classic" = "经典"
+
+[strings.ja]
+"Dial" = "文字盤"
+"Classic" = "クラシック"
+
+[strings.ko]
+"Dial" = "다이얼"
+"Classic" = "클래식"

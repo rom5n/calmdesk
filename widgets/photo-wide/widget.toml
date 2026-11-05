@@ -1,0 +1,107 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.photo-wide"
+name = "Photo"
+variant = "Wide"
+category = "Photos"
+engine = "^0.1"
+size = [352, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme"]
+
+[[option]]
+key = "photo"
+label = "Photo"
+kind = "image"
+
+[[option]]
+key = "folder"
+label = "Folder"
+kind = "folder"
+
+[strings.ru]
+"Photo" = "Фото"
+"Wide" = "Широкий"
+"Add a photo" = "Добавьте фото"
+"Right-click, then Photo or Folder" = "Нажмите правой кнопкой → «Фото» или «Папка»"
+"Folder" = "Папка"
+
+[strings.uk]
+"Photo" = "Фото"
+"Wide" = "Широкий"
+"Add a photo" = "Додайте фото"
+"Right-click, then Photo or Folder" = "Клацніть правою кнопкою → «Фото» або «Тека»"
+"Folder" = "Тека"
+
+[strings.de]
+"Photo" = "Foto"
+"Wide" = "Breit"
+"Add a photo" = "Foto hinzufügen"
+"Right-click, then Photo or Folder" = "Rechtsklick, dann „Foto“ oder „Ordner“"
+"Folder" = "Ordner"
+
+[strings.fr]
+"Photo" = "Photo"
+"Wide" = "Large"
+"Add a photo" = "Ajoutez une photo"
+"Right-click, then Photo or Folder" = "Clic droit, puis Photo ou Dossier"
+"Folder" = "Dossier"
+
+[strings.es]
+"Photo" = "Foto"
+"Wide" = "Ancho"
+"Add a photo" = "Añade una foto"
+"Right-click, then Photo or Folder" = "Clic derecho y luego Foto o Carpeta"
+"Folder" = "Carpeta"
+
+[strings.it]
+"Photo" = "Foto"
+"Wide" = "Largo"
+"Add a photo" = "Aggiungi una foto"
+"Right-click, then Photo or Folder" = "Clic destro, poi Foto o Cartella"
+"Folder" = "Cartella"
+
+[strings.pt]
+"Photo" = "Foto"
+"Wide" = "Largo"
+"Add a photo" = "Adicione uma foto"
+"Right-click, then Photo or Folder" = "Clique com o botão direito e escolha Foto ou Pasta"
+"Folder" = "Pasta"
+
+[strings.pl]
+"Photo" = "Zdjęcie"
+"Wide" = "Szeroki"
+"Add a photo" = "Dodaj zdjęcie"
+"Right-click, then Photo or Folder" = "Kliknij prawym, potem Zdjęcie lub Folder"
+"Folder" = "Folder"
+
+[strings.zh]
+"Photo" = "照片"
+"Wide" = "宽"
+"Add a photo" = "添加照片"
+"Right-click, then Photo or Folder" = "右键单击，然后选择“照片”或“文件夹”"
+"Folder" = "文件夹"
+
+[strings.ja]
+"Photo" = "写真"
+"Wide" = "ワイド"
+"Add a photo" = "写真を追加"
+"Right-click, then Photo or Folder" = "右クリックして「写真」か「フォルダー」"
+"Folder" = "フォルダー"
+
+[strings.ko]
+"Photo" = "사진"
+"Wide" = "와이드"
+"Add a photo" = "사진 추가"
+"Right-click, then Photo or Folder" = "마우스 오른쪽 버튼 → 사진 또는 폴더"
+"Folder" = "폴더"

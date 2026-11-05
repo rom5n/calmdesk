@@ -1,0 +1,19 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <column padding="16 16 14 16" width="fill" height="fill">
+    <text value="{str.Stopwatch}" size="13" weight="700" color="#FF9500"/>
+    <spacer grow="1"/>
+    <text value="{app.time}" size="34" weight="600" features="tnum"/>
+    <spacer grow="1"/>
+    <row gap="14">
+      <stack width="38" height="38" action="timer:toggle" scale="1" pressed.scale="0.86" transition="spring">
+        <ellipse width="fill" height="fill" fill="#80808030"/>
+        <image if="app.running" src="assets/pause.svg" width="17" height="17"/>
+        <image if="!app.running" src="assets/play.svg" width="17" height="17"/>
+      </stack>
+      <stack width="38" height="38" action="timer:reset" scale="1" pressed.scale="0.86" transition="spring">
+        <ellipse width="fill" height="fill" fill="#80808030"/>
+        <image src="assets/reset.svg" width="17" height="17"/>
+      </stack>
+    </row>
+  </column>
+</widget>

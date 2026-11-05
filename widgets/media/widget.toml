@@ -1,0 +1,64 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.media"
+name = "Now Playing"
+variant = "Wide"
+category = "Media"
+engine = "^0.1"
+size = [352, 184]
+
+[card]
+radius = 26
+background = "glass"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "shape", "font"]
+
+[strings.ru]
+"Now Playing" = "Сейчас играет"
+"Wide" = "Широкий"
+
+[strings.uk]
+"Now Playing" = "Зараз грає"
+"Wide" = "Широкий"
+
+[strings.de]
+"Now Playing" = "Wiedergabe"
+"Wide" = "Breit"
+
+[strings.fr]
+"Now Playing" = "En cours de lecture"
+"Wide" = "Large"
+
+[strings.es]
+"Now Playing" = "Reproduciendo"
+"Wide" = "Ancho"
+
+[strings.it]
+"Now Playing" = "In riproduzione"
+"Wide" = "Largo"
+
+[strings.pt]
+"Now Playing" = "Tocando agora"
+"Wide" = "Largo"
+
+[strings.pl]
+"Now Playing" = "Teraz odtwarzane"
+"Wide" = "Szeroki"
+
+[strings.zh]
+"Now Playing" = "正在播放"
+"Wide" = "宽"
+
+[strings.ja]
+"Now Playing" = "再生中"
+"Wide" = "ワイド"
+
+[strings.ko]
+"Now Playing" = "지금 재생 중"
+"Wide" = "와이드"

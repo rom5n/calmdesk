@@ -1,0 +1,97 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.battery-wide"
+name = "Battery"
+variant = "Wide"
+category = "System"
+engine = "^0.1"
+size = [352, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Battery" = "Батарея"
+"Wide" = "Широкий"
+"Charging" = "Заряжается"
+"Plugged in" = "От сети"
+"On battery" = "От батареи"
+
+[strings.uk]
+"Battery" = "Акумулятор"
+"Wide" = "Широкий"
+"Charging" = "Заряджається"
+"Plugged in" = "Від мережі"
+"On battery" = "Від акумулятора"
+
+[strings.de]
+"Battery" = "Akku"
+"Wide" = "Breit"
+"Charging" = "Wird geladen"
+"Plugged in" = "Angeschlossen"
+"On battery" = "Akkubetrieb"
+
+[strings.fr]
+"Battery" = "Batterie"
+"Wide" = "Large"
+"Charging" = "En charge"
+"Plugged in" = "Branché"
+"On battery" = "Sur batterie"
+
+[strings.es]
+"Battery" = "Batería"
+"Wide" = "Ancho"
+"Charging" = "Cargando"
+"Plugged in" = "Conectado"
+"On battery" = "Con batería"
+
+[strings.it]
+"Battery" = "Batteria"
+"Wide" = "Largo"
+"Charging" = "In carica"
+"Plugged in" = "Collegato"
+"On battery" = "A batteria"
+
+[strings.pt]
+"Battery" = "Bateria"
+"Wide" = "Largo"
+"Charging" = "Carregando"
+"Plugged in" = "Conectado"
+"On battery" = "Na bateria"
+
+[strings.pl]
+"Battery" = "Bateria"
+"Wide" = "Szeroki"
+"Charging" = "Ładowanie"
+"Plugged in" = "Podłączono"
+"On battery" = "Na baterii"
+
+[strings.zh]
+"Battery" = "电池"
+"Wide" = "宽"
+"Charging" = "正在充电"
+"Plugged in" = "已接通电源"
+"On battery" = "使用电池"
+
+[strings.ja]
+"Battery" = "バッテリー"
+"Wide" = "ワイド"
+"Charging" = "充電中"
+"Plugged in" = "電源接続"
+"On battery" = "バッテリー駆動"
+
+[strings.ko]
+"Battery" = "배터리"
+"Wide" = "와이드"
+"Charging" = "충전 중"
+"Plugged in" = "전원 연결됨"
+"On battery" = "배터리 사용"

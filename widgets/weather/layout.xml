@@ -1,0 +1,47 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- From the app: the city picked in the menu (or the one of the IP address), forecast from
+       Open-Meteo, every 30 minutes. -->
+  <column padding="14 18 12 18" gap="6" width="fill" height="fill">
+    <row width="fill" align="start" gap="10">
+      <column grow="1">
+        <text value="{app.city}" size="15" weight="600" ellipsis="true" width="fill"/>
+        <text if="app.temp" value="{app.temp}" size="40" weight="300" features="tnum"/>
+        <text if="!app.temp" value="{str.Updating…}" size="13" color="secondary"/>
+      </column>
+      <column width="150" align="end" gap="2">
+        <image if="app.icon" src="assets/{app.icon}.svg" width="28" height="28"/>
+        <text if="app.k_clear" value="{str.Clear}" size="13" weight="500" ellipsis="true" text-align="end" width="fill"/>
+        <text if="app.k_partly" value="{str.Partly cloudy}" size="13" weight="500" ellipsis="true" text-align="end" width="fill"/>
+        <text if="app.k_cloud" value="{str.Cloudy}" size="13" weight="500" ellipsis="true" text-align="end" width="fill"/>
+        <text if="app.k_fog" value="{str.Fog}" size="13" weight="500" ellipsis="true" text-align="end" width="fill"/>
+        <text if="app.k_rain" value="{str.Rain}" size="13" weight="500" ellipsis="true" text-align="end" width="fill"/>
+        <text if="app.k_snow" value="{str.Snow}" size="13" weight="500" ellipsis="true" text-align="end" width="fill"/>
+        <text if="app.k_storm" value="{str.Thunderstorm}" size="13" weight="500" ellipsis="true" text-align="end" width="fill"/>
+        <text if="app.temp" value="↑{app.hi}  ↓{app.lo}" size="12" color="secondary" features="tnum"/>
+      </column>
+    </row>
+    <spacer grow="1"/>
+    <row if="app.temp" width="fill" justify="space-between">
+      <column width="36" align="center" gap="2">
+        <text value="{app.w1}" size="11" weight="500" color="secondary"/>
+        <image if="app.i1" src="assets/{app.i1}.svg" width="20" height="20"/>
+        <text value="{app.h1}" size="12" weight="600" features="tnum"/>
+      </column>
+      <column width="36" align="center" gap="2">
+        <text value="{app.w2}" size="11" weight="500" color="secondary"/>
+        <image if="app.i2" src="assets/{app.i2}.svg" width="20" height="20"/>
+        <text value="{app.h2}" size="12" weight="600" features="tnum"/>
+      </column>
+      <column width="36" align="center" gap="2">
+        <text value="{app.w3}" size="11" weight="500" color="secondary"/>
+        <image if="app.i3" src="assets/{app.i3}.svg" width="20" height="20"/>
+        <text value="{app.h3}" size="12" weight="600" features="tnum"/>
+      </column>
+      <column width="36" align="center" gap="2">
+        <text value="{app.w4}" size="11" weight="500" color="secondary"/>
+        <image if="app.i4" src="assets/{app.i4}.svg" width="20" height="20"/>
+        <text value="{app.h4}" size="12" weight="600" features="tnum"/>
+      </column>
+    </row>
+  </column>
+</widget>

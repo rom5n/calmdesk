@@ -1,0 +1,74 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.bluetooth"
+name = "Bluetooth"
+category = "System"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Bluetooth" = "Bluetooth"
+"On" = "Вкл."
+"Off" = "Выкл."
+
+[strings.uk]
+"Bluetooth" = "Bluetooth"
+"On" = "Увімк."
+"Off" = "Вимк."
+
+[strings.de]
+"Bluetooth" = "Bluetooth"
+"On" = "Ein"
+"Off" = "Aus"
+
+[strings.fr]
+"Bluetooth" = "Bluetooth"
+"On" = "Activé"
+"Off" = "Désactivé"
+
+[strings.es]
+"Bluetooth" = "Bluetooth"
+"On" = "Activado"
+"Off" = "Desactivado"
+
+[strings.it]
+"Bluetooth" = "Bluetooth"
+"On" = "Attivo"
+"Off" = "Disattivo"
+
+[strings.pt]
+"Bluetooth" = "Bluetooth"
+"On" = "Ativado"
+"Off" = "Desativado"
+
+[strings.pl]
+"Bluetooth" = "Bluetooth"
+"On" = "Wł."
+"Off" = "Wył."
+
+[strings.zh]
+"Bluetooth" = "蓝牙"
+"On" = "开"
+"Off" = "关"
+
+[strings.ja]
+"Bluetooth" = "Bluetooth"
+"On" = "オン"
+"Off" = "オフ"
+
+[strings.ko]
+"Bluetooth" = "블루투스"
+"On" = "켬"
+"Off" = "끔"

@@ -1,0 +1,14 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <style class="hand" shadow="0 0 3 #00000059"/>
+  <column padding="12 14 12 14" width="fill" height="fill" align="center" gap="2">
+    <stack width="84" height="84">
+      <image src="assets/dial.svg" width="fill" height="fill"/>
+      <image class="hand" src="assets/hand-hour.svg" width="fill" height="fill" rotate="{clock.hour_angle}" spin="0.008333"/>
+      <image class="hand" src="assets/hand-minute.svg" width="fill" height="fill" rotate="{clock.minute_angle}" spin="0.1"/>
+      <image class="hand" src="assets/hand-second.svg" width="fill" height="fill" rotate="{clock.second_angle}" spin="6"/>
+    </stack>
+    <spacer grow="1"/>
+    <text fit="true" value="{clock.time}" size="24" weight="600" features="tnum"/>
+    <text value="{clock.weekday}" size="12" color="secondary"/>
+  </column>
+</widget>

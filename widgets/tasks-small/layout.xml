@@ -1,0 +1,48 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- Tasks are lines of a text file the title opens in Notepad; "[x] " marks done ones.
+       A circle ticks its task off. -->
+  <column padding="14 16" gap="8" width="fill" height="fill">
+    <row width="fill" align="center" action="edit">
+      <text value="{str.Tasks}" size="14" weight="700" color="accent"/>
+      <spacer grow="1"/>
+      <text if="app.t0" value="{app.count}" size="14" weight="700" color="accent"/>
+    </row>
+    <text if="!app.t0" value="{str.Click the title to add tasks}" size="13" color="secondary" width="fill"/>
+    <row if="app.t0" gap="9" align="center" width="fill">
+      <stack width="18" height="18" action="task:0" scale="1" pressed.scale="0.8" transition="spring">
+        <ellipse if="!app.d0" width="fill" height="fill" fill="transparent" stroke="secondary" stroke-width="1.5"/>
+        <ellipse if="app.d0" width="fill" height="fill" fill="accent"/>
+        <image if="app.d0" src="assets/check.svg" width="12" height="12"/>
+      </stack>
+      <text if="!app.d0" value="{app.t0}" size="13" ellipsis="true" grow="1"/>
+      <text if="app.d0" value="{app.t0}" size="13" color="secondary" ellipsis="true" grow="1"/>
+    </row>
+    <row if="app.t1" gap="9" align="center" width="fill">
+      <stack width="18" height="18" action="task:1" scale="1" pressed.scale="0.8" transition="spring">
+        <ellipse if="!app.d1" width="fill" height="fill" fill="transparent" stroke="secondary" stroke-width="1.5"/>
+        <ellipse if="app.d1" width="fill" height="fill" fill="accent"/>
+        <image if="app.d1" src="assets/check.svg" width="12" height="12"/>
+      </stack>
+      <text if="!app.d1" value="{app.t1}" size="13" ellipsis="true" grow="1"/>
+      <text if="app.d1" value="{app.t1}" size="13" color="secondary" ellipsis="true" grow="1"/>
+    </row>
+    <row if="app.t2" gap="9" align="center" width="fill">
+      <stack width="18" height="18" action="task:2" scale="1" pressed.scale="0.8" transition="spring">
+        <ellipse if="!app.d2" width="fill" height="fill" fill="transparent" stroke="secondary" stroke-width="1.5"/>
+        <ellipse if="app.d2" width="fill" height="fill" fill="accent"/>
+        <image if="app.d2" src="assets/check.svg" width="12" height="12"/>
+      </stack>
+      <text if="!app.d2" value="{app.t2}" size="13" ellipsis="true" grow="1"/>
+      <text if="app.d2" value="{app.t2}" size="13" color="secondary" ellipsis="true" grow="1"/>
+    </row>
+    <row if="app.t3" gap="9" align="center" width="fill">
+      <stack width="18" height="18" action="task:3" scale="1" pressed.scale="0.8" transition="spring">
+        <ellipse if="!app.d3" width="fill" height="fill" fill="transparent" stroke="secondary" stroke-width="1.5"/>
+        <ellipse if="app.d3" width="fill" height="fill" fill="accent"/>
+        <image if="app.d3" src="assets/check.svg" width="12" height="12"/>
+      </stack>
+      <text if="!app.d3" value="{app.t3}" size="13" ellipsis="true" grow="1"/>
+      <text if="app.d3" value="{app.t3}" size="13" color="secondary" ellipsis="true" grow="1"/>
+    </row>
+  </column>
+</widget>

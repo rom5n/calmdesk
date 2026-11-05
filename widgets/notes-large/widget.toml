@@ -1,0 +1,75 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.notes-large"
+name = "Notes"
+variant = "Large"
+category = "Productivity"
+engine = "^0.1"
+size = [352, 352]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Notes" = "Заметки"
+"Large" = "Большой"
+"Click the title to write a note" = "Нажмите на заголовок, чтобы написать заметку"
+
+[strings.uk]
+"Notes" = "Нотатки"
+"Large" = "Великий"
+"Click the title to write a note" = "Натисніть на заголовок, щоб написати нотатку"
+
+[strings.de]
+"Notes" = "Notizen"
+"Large" = "Groß"
+"Click the title to write a note" = "Auf den Titel klicken, um eine Notiz zu schreiben"
+
+[strings.fr]
+"Notes" = "Notes"
+"Large" = "Grand"
+"Click the title to write a note" = "Cliquez sur le titre pour écrire une note"
+
+[strings.es]
+"Notes" = "Notas"
+"Large" = "Grande"
+"Click the title to write a note" = "Haz clic en el título para escribir una nota"
+
+[strings.it]
+"Notes" = "Note"
+"Large" = "Grande"
+"Click the title to write a note" = "Fai clic sul titolo per scrivere una nota"
+
+[strings.pt]
+"Notes" = "Notas"
+"Large" = "Grande"
+"Click the title to write a note" = "Clique no título para escrever uma nota"
+
+[strings.pl]
+"Notes" = "Notatki"
+"Large" = "Duży"
+"Click the title to write a note" = "Kliknij tytuł, aby napisać notatkę"
+
+[strings.zh]
+"Notes" = "便笺"
+"Large" = "大"
+"Click the title to write a note" = "单击标题以写便笺"
+
+[strings.ja]
+"Notes" = "メモ"
+"Large" = "大"
+"Click the title to write a note" = "タイトルをクリックしてメモを書く"
+
+[strings.ko]
+"Notes" = "메모"
+"Large" = "크게"
+"Click the title to write a note" = "제목을 클릭하여 메모 작성"

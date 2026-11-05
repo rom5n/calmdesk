@@ -1,0 +1,64 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.clock-analog-modern"
+name = "Dial"
+variant = "Modern"
+category = "Time"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Dial" = "Циферблат"
+"Modern" = "Современный"
+
+[strings.uk]
+"Dial" = "Циферблат"
+"Modern" = "Сучасний"
+
+[strings.de]
+"Dial" = "Zifferblatt"
+"Modern" = "Modern"
+
+[strings.fr]
+"Dial" = "Cadran"
+"Modern" = "Moderne"
+
+[strings.es]
+"Dial" = "Esfera"
+"Modern" = "Moderno"
+
+[strings.it]
+"Dial" = "Quadrante"
+"Modern" = "Moderno"
+
+[strings.pt]
+"Dial" = "Mostrador"
+"Modern" = "Moderno"
+
+[strings.pl]
+"Dial" = "Tarcza"
+"Modern" = "Nowoczesny"
+
+[strings.zh]
+"Dial" = "表盘"
+"Modern" = "现代"
+
+[strings.ja]
+"Dial" = "文字盤"
+"Modern" = "モダン"
+
+[strings.ko]
+"Dial" = "다이얼"
+"Modern" = "모던"

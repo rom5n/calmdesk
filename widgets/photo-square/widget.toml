@@ -1,0 +1,107 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.photo-square"
+name = "Photo"
+variant = "Square"
+category = "Photos"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme"]
+
+[[option]]
+key = "photo"
+label = "Photo"
+kind = "image"
+
+[[option]]
+key = "folder"
+label = "Folder"
+kind = "folder"
+
+[strings.ru]
+"Photo" = "Фото"
+"Square" = "Квадратный"
+"Add a photo" = "Добавьте фото"
+"Right-click, then Photo or Folder" = "Нажмите правой кнопкой → «Фото» или «Папка»"
+"Folder" = "Папка"
+
+[strings.uk]
+"Photo" = "Фото"
+"Square" = "Квадратний"
+"Add a photo" = "Додайте фото"
+"Right-click, then Photo or Folder" = "Клацніть правою кнопкою → «Фото» або «Тека»"
+"Folder" = "Тека"
+
+[strings.de]
+"Photo" = "Foto"
+"Square" = "Quadratisch"
+"Add a photo" = "Foto hinzufügen"
+"Right-click, then Photo or Folder" = "Rechtsklick, dann „Foto“ oder „Ordner“"
+"Folder" = "Ordner"
+
+[strings.fr]
+"Photo" = "Photo"
+"Square" = "Carré"
+"Add a photo" = "Ajoutez une photo"
+"Right-click, then Photo or Folder" = "Clic droit, puis Photo ou Dossier"
+"Folder" = "Dossier"
+
+[strings.es]
+"Photo" = "Foto"
+"Square" = "Cuadrado"
+"Add a photo" = "Añade una foto"
+"Right-click, then Photo or Folder" = "Clic derecho y luego Foto o Carpeta"
+"Folder" = "Carpeta"
+
+[strings.it]
+"Photo" = "Foto"
+"Square" = "Quadrato"
+"Add a photo" = "Aggiungi una foto"
+"Right-click, then Photo or Folder" = "Clic destro, poi Foto o Cartella"
+"Folder" = "Cartella"
+
+[strings.pt]
+"Photo" = "Foto"
+"Square" = "Quadrado"
+"Add a photo" = "Adicione uma foto"
+"Right-click, then Photo or Folder" = "Clique com o botão direito e escolha Foto ou Pasta"
+"Folder" = "Pasta"
+
+[strings.pl]
+"Photo" = "Zdjęcie"
+"Square" = "Kwadratowy"
+"Add a photo" = "Dodaj zdjęcie"
+"Right-click, then Photo or Folder" = "Kliknij prawym, potem Zdjęcie lub Folder"
+"Folder" = "Folder"
+
+[strings.zh]
+"Photo" = "照片"
+"Square" = "方形"
+"Add a photo" = "添加照片"
+"Right-click, then Photo or Folder" = "右键单击，然后选择“照片”或“文件夹”"
+"Folder" = "文件夹"
+
+[strings.ja]
+"Photo" = "写真"
+"Square" = "正方形"
+"Add a photo" = "写真を追加"
+"Right-click, then Photo or Folder" = "右クリックして「写真」か「フォルダー」"
+"Folder" = "フォルダー"
+
+[strings.ko]
+"Photo" = "사진"
+"Square" = "정사각형"
+"Add a photo" = "사진 추가"
+"Right-click, then Photo or Folder" = "마우스 오른쪽 버튼 → 사진 또는 폴더"
+"Folder" = "폴더"

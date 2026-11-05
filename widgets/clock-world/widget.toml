@@ -1,0 +1,120 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.clock-world"
+name = "World Clock"
+category = "Time"
+engine = "^0.1"
+size = [352, 170]
+
+[card]
+radius = 26
+background = "solid"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[[option]]
+key = "city0"
+label = "City 1"
+values = [["Los Angeles", "Los Angeles"], ["New York", "New York"], ["São Paulo", "São Paulo"], ["London", "London"], ["Paris", "Paris"], ["Berlin", "Berlin"], ["Kyiv", "Kyiv"], ["Istanbul", "Istanbul"], ["Moscow", "Moscow"], ["Dubai", "Dubai"], ["New Delhi", "New Delhi"], ["Bangkok", "Bangkok"], ["Beijing", "Beijing"], ["Tokyo", "Tokyo"], ["Sydney", "Sydney"]]
+default = "New Delhi"
+
+[[option]]
+key = "city1"
+label = "City 2"
+values = [["Los Angeles", "Los Angeles"], ["New York", "New York"], ["São Paulo", "São Paulo"], ["London", "London"], ["Paris", "Paris"], ["Berlin", "Berlin"], ["Kyiv", "Kyiv"], ["Istanbul", "Istanbul"], ["Moscow", "Moscow"], ["Dubai", "Dubai"], ["New Delhi", "New Delhi"], ["Bangkok", "Bangkok"], ["Beijing", "Beijing"], ["Tokyo", "Tokyo"], ["Sydney", "Sydney"]]
+default = "Dubai"
+
+[[option]]
+key = "city2"
+label = "City 3"
+values = [["Los Angeles", "Los Angeles"], ["New York", "New York"], ["São Paulo", "São Paulo"], ["London", "London"], ["Paris", "Paris"], ["Berlin", "Berlin"], ["Kyiv", "Kyiv"], ["Istanbul", "Istanbul"], ["Moscow", "Moscow"], ["Dubai", "Dubai"], ["New Delhi", "New Delhi"], ["Bangkok", "Bangkok"], ["Beijing", "Beijing"], ["Tokyo", "Tokyo"], ["Sydney", "Sydney"]]
+default = "London"
+
+[[option]]
+key = "city3"
+label = "City 4"
+values = [["Los Angeles", "Los Angeles"], ["New York", "New York"], ["São Paulo", "São Paulo"], ["London", "London"], ["Paris", "Paris"], ["Berlin", "Berlin"], ["Kyiv", "Kyiv"], ["Istanbul", "Istanbul"], ["Moscow", "Moscow"], ["Dubai", "Dubai"], ["New Delhi", "New Delhi"], ["Bangkok", "Bangkok"], ["Beijing", "Beijing"], ["Tokyo", "Tokyo"], ["Sydney", "Sydney"]]
+default = "Paris"
+
+[strings.ru]
+"World Clock" = "Мировое время"
+"City 1" = "Город 1"
+"City 2" = "Город 2"
+"City 3" = "Город 3"
+"City 4" = "Город 4"
+
+[strings.uk]
+"World Clock" = "Світовий час"
+"City 1" = "Місто 1"
+"City 2" = "Місто 2"
+"City 3" = "Місто 3"
+"City 4" = "Місто 4"
+
+[strings.de]
+"World Clock" = "Weltuhr"
+"City 1" = "Stadt 1"
+"City 2" = "Stadt 2"
+"City 3" = "Stadt 3"
+"City 4" = "Stadt 4"
+
+[strings.fr]
+"World Clock" = "Horloge mondiale"
+"City 1" = "Ville 1"
+"City 2" = "Ville 2"
+"City 3" = "Ville 3"
+"City 4" = "Ville 4"
+
+[strings.es]
+"World Clock" = "Reloj mundial"
+"City 1" = "Ciudad 1"
+"City 2" = "Ciudad 2"
+"City 3" = "Ciudad 3"
+"City 4" = "Ciudad 4"
+
+[strings.it]
+"World Clock" = "Orologio mondiale"
+"City 1" = "Città 1"
+"City 2" = "Città 2"
+"City 3" = "Città 3"
+"City 4" = "Città 4"
+
+[strings.pt]
+"World Clock" = "Relógio mundial"
+"City 1" = "Cidade 1"
+"City 2" = "Cidade 2"
+"City 3" = "Cidade 3"
+"City 4" = "Cidade 4"
+
+[strings.pl]
+"World Clock" = "Zegar światowy"
+"City 1" = "Miasto 1"
+"City 2" = "Miasto 2"
+"City 3" = "Miasto 3"
+"City 4" = "Miasto 4"
+
+[strings.zh]
+"World Clock" = "世界时钟"
+"City 1" = "城市 1"
+"City 2" = "城市 2"
+"City 3" = "城市 3"
+"City 4" = "城市 4"
+
+[strings.ja]
+"World Clock" = "世界時計"
+"City 1" = "都市 1"
+"City 2" = "都市 2"
+"City 3" = "都市 3"
+"City 4" = "都市 4"
+
+[strings.ko]
+"World Clock" = "세계 시계"
+"City 1" = "도시 1"
+"City 2" = "도시 2"
+"City 3" = "도시 3"
+"City 4" = "도시 4"

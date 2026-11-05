@@ -1,0 +1,36 @@
+[package]
+name = "calmdesk"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish = false
+description = "Calmdesk: tray app with a widget gallery; hosts widgets and restores them at sign-in"
+
+[dependencies]
+widget-engine = { path = "../../../engine/crates/engine" }
+media = { path = "../media" }
+
+[dependencies.windows]
+version = "0.62"
+features = [
+    "Devices_Radios",
+    "Foundation_Collections",
+    "Win32_Foundation",
+    "Win32_Graphics_Direct2D",
+    "Win32_Graphics_Direct2D_Common",
+    "Win32_Graphics_DirectWrite",
+    "Win32_Graphics_Gdi",
+    "Win32_Globalization",
+    "Win32_System_Com",
+    "Win32_System_Diagnostics_Debug",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Power",
+    "Win32_System_Registry",
+    "Win32_System_SystemInformation",
+    "Win32_System_Time",
+    "Win32_System_Threading",
+    "Win32_UI_HiDpi",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+]

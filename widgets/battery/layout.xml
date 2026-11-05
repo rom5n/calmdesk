@@ -1,0 +1,14 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <column padding="14" gap="8" width="fill" height="fill" align="center" justify="center">
+    <stack width="100" height="100">
+      <image if="app.battery" src="assets/ring.svg" width="fill" height="fill"/>
+      <column align="center">
+        <image if="app.charging" src="assets/bolt.svg" width="16" height="16"/>
+        <text value="{app.percent}" size="24" weight="600" features="tnum"/>
+      </column>
+    </stack>
+    <text if="app.charging" value="{str.Charging}" size="13" color="secondary"/>
+    <text if="app.plugged" value="{str.Plugged in}" size="13" color="secondary"/>
+    <text if="app.unplugged" value="{str.On battery}" size="13" color="secondary"/>
+  </column>
+</widget>

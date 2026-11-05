@@ -1,0 +1,15 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- The switch takes clicks; double-click and hold anywhere else moves the widget. -->
+  <column padding="18" width="fill" height="fill">
+    <stack width="54" height="54" action="airplane" scale="1" pressed.scale="0.88" transition="spring">
+      <ellipse if="app.plane" width="fill" height="fill" fill="accent"/>
+      <ellipse if="!app.plane" width="fill" height="fill" fill="#80808030"/>
+      <image if="app.plane" src="assets/airplane-on.svg" width="26" height="26"/>
+      <image if="!app.plane" src="assets/airplane.svg" width="26" height="26"/>
+    </stack>
+    <spacer grow="1"/>
+    <text value="{str.Airplane mode}" size="16" weight="600" width="fill"/>
+    <text if="app.plane" value="{str.On}" size="13" color="secondary"/>
+    <text if="!app.plane" value="{str.Off}" size="13" color="secondary"/>
+  </column>
+</widget>

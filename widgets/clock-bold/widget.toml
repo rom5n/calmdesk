@@ -1,0 +1,58 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.clock-bold"
+name = "Digital Clock"
+variant = "Bold"
+category = "Time"
+engine = "^0.1"
+size = [352, 170]
+
+[font]
+family = "Nunito"
+weight = 900
+
+[customize]
+allow = ["size", "theme", "font", "text"]
+
+[strings.ru]
+"Digital Clock" = "Цифровые часы"
+"Bold" = "Жирный"
+
+[strings.uk]
+"Digital Clock" = "Цифровий годинник"
+"Bold" = "Жирний"
+
+[strings.de]
+"Digital Clock" = "Digitaluhr"
+"Bold" = "Fett"
+
+[strings.fr]
+"Digital Clock" = "Horloge numérique"
+"Bold" = "Gras"
+
+[strings.es]
+"Digital Clock" = "Reloj digital"
+"Bold" = "Negrita"
+
+[strings.it]
+"Digital Clock" = "Orologio digitale"
+"Bold" = "Grassetto"
+
+[strings.pt]
+"Digital Clock" = "Relógio digital"
+"Bold" = "Negrito"
+
+[strings.pl]
+"Digital Clock" = "Zegar cyfrowy"
+"Bold" = "Pogrubiony"
+
+[strings.zh]
+"Digital Clock" = "数字时钟"
+"Bold" = "粗体"
+
+[strings.ja]
+"Digital Clock" = "デジタル時計"
+"Bold" = "太字"
+
+[strings.ko]
+"Digital Clock" = "디지털 시계"
+"Bold" = "굵게"

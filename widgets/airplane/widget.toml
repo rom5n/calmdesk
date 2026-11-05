@@ -1,0 +1,74 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.airplane"
+name = "Airplane mode"
+category = "System"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Airplane mode" = "Режим «в самолёте»"
+"On" = "Вкл."
+"Off" = "Выкл."
+
+[strings.uk]
+"Airplane mode" = "Режим «У літаку»"
+"On" = "Увімк."
+"Off" = "Вимк."
+
+[strings.de]
+"Airplane mode" = "Flugzeugmodus"
+"On" = "Ein"
+"Off" = "Aus"
+
+[strings.fr]
+"Airplane mode" = "Mode Avion"
+"On" = "Activé"
+"Off" = "Désactivé"
+
+[strings.es]
+"Airplane mode" = "Modo avión"
+"On" = "Activado"
+"Off" = "Desactivado"
+
+[strings.it]
+"Airplane mode" = "Modalità aereo"
+"On" = "Attivo"
+"Off" = "Disattivo"
+
+[strings.pt]
+"Airplane mode" = "Modo avião"
+"On" = "Ativado"
+"Off" = "Desativado"
+
+[strings.pl]
+"Airplane mode" = "Tryb samolotowy"
+"On" = "Wł."
+"Off" = "Wył."
+
+[strings.zh]
+"Airplane mode" = "飞行模式"
+"On" = "开"
+"Off" = "关"
+
+[strings.ja]
+"Airplane mode" = "機内モード"
+"On" = "オン"
+"Off" = "オフ"
+
+[strings.ko]
+"Airplane mode" = "비행기 모드"
+"On" = "켬"
+"Off" = "끔"

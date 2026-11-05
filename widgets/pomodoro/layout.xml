@@ -1,0 +1,24 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- The app counts down (on its UI thread) and sets app.time, app.dash and app.running. -->
+  <column padding="12" gap="8" width="fill" height="fill" align="center">
+    <stack width="102" height="102">
+      <image src="assets/ring.svg" width="fill" height="fill"/>
+      <column width="74" align="center">
+        <text fit="true" value="{app.time}" size="24" weight="700" features="tnum"/>
+        <text if="app.focus" value="{str.Focus}" size="11" weight="600" color="secondary"/>
+        <text if="!app.focus" value="{str.Break}" size="11" weight="600" color="secondary"/>
+      </column>
+    </stack>
+    <row gap="16">
+      <stack width="34" height="34" action="timer:toggle" scale="1" pressed.scale="0.86" transition="spring">
+        <ellipse width="fill" height="fill" fill="#80808030"/>
+        <image if="app.running" src="assets/pause.svg" width="16" height="16"/>
+        <image if="!app.running" src="assets/play.svg" width="16" height="16"/>
+      </stack>
+      <stack width="34" height="34" action="timer:skip" scale="1" pressed.scale="0.86" transition="spring">
+        <ellipse width="fill" height="fill" fill="#80808030"/>
+        <image src="assets/skip.svg" width="16" height="16"/>
+      </stack>
+    </row>
+  </column>
+</widget>

@@ -1,0 +1,58 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.clock-bold-stacked"
+name = "Digital Clock"
+variant = "Bold, stacked"
+category = "Time"
+engine = "^0.1"
+size = [170, 170]
+
+[font]
+family = "Nunito"
+weight = 900
+
+[customize]
+allow = ["size", "theme", "font", "text"]
+
+[strings.ru]
+"Digital Clock" = "Цифровые часы"
+"Bold, stacked" = "Жирный, в столбик"
+
+[strings.uk]
+"Digital Clock" = "Цифровий годинник"
+"Bold, stacked" = "Жирний, у стовпчик"
+
+[strings.de]
+"Digital Clock" = "Digitaluhr"
+"Bold, stacked" = "Fett, gestapelt"
+
+[strings.fr]
+"Digital Clock" = "Horloge numérique"
+"Bold, stacked" = "Gras, empilé"
+
+[strings.es]
+"Digital Clock" = "Reloj digital"
+"Bold, stacked" = "Negrita, apilado"
+
+[strings.it]
+"Digital Clock" = "Orologio digitale"
+"Bold, stacked" = "Grassetto, impilato"
+
+[strings.pt]
+"Digital Clock" = "Relógio digital"
+"Bold, stacked" = "Negrito, empilhado"
+
+[strings.pl]
+"Digital Clock" = "Zegar cyfrowy"
+"Bold, stacked" = "Pogrubiony, w kolumnie"
+
+[strings.zh]
+"Digital Clock" = "数字时钟"
+"Bold, stacked" = "粗体，堆叠"
+
+[strings.ja]
+"Digital Clock" = "デジタル時計"
+"Bold, stacked" = "太字・縦並び"
+
+[strings.ko]
+"Digital Clock" = "디지털 시계"
+"Bold, stacked" = "굵게, 세로"

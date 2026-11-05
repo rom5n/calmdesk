@@ -1,0 +1,180 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.weather"
+name = "Weather"
+variant = "Wide"
+category = "Weather"
+engine = "^0.1"
+size = [352, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[[option]]
+key = "city"
+label = "City"
+values = [["auto", "Automatic"], ["Americas/Los Angeles", "Los Angeles"], ["Americas/Chicago", "Chicago"], ["Americas/New York", "New York"], ["Americas/Toronto", "Toronto"], ["Americas/São Paulo", "São Paulo"], ["Europe/London", "London"], ["Europe/Amsterdam", "Amsterdam"], ["Europe/Paris", "Paris"], ["Europe/Madrid", "Madrid"], ["Europe/Rome", "Rome"], ["Europe/Berlin", "Berlin"], ["Europe/Prague", "Prague"], ["Europe/Vienna", "Vienna"], ["Europe/Warsaw", "Warsaw"], ["Europe/Istanbul", "Istanbul"], ["Eastern Europe/Lviv", "Lviv"], ["Eastern Europe/Kyiv", "Kyiv"], ["Eastern Europe/Kharkiv", "Kharkiv"], ["Eastern Europe/Odesa", "Odesa"], ["Eastern Europe/Minsk", "Minsk"], ["Eastern Europe/Saint Petersburg", "Saint Petersburg"], ["Eastern Europe/Moscow", "Moscow"], ["Eastern Europe/Kazan", "Kazan"], ["Asia & Pacific/Yekaterinburg", "Yekaterinburg"], ["Asia & Pacific/Novosibirsk", "Novosibirsk"], ["Asia & Pacific/Almaty", "Almaty"], ["Asia & Pacific/Dubai", "Dubai"], ["Asia & Pacific/New Delhi", "New Delhi"], ["Asia & Pacific/Bangkok", "Bangkok"], ["Asia & Pacific/Singapore", "Singapore"], ["Asia & Pacific/Beijing", "Beijing"], ["Asia & Pacific/Seoul", "Seoul"], ["Asia & Pacific/Tokyo", "Tokyo"], ["Asia & Pacific/Sydney", "Sydney"]]
+default = "auto"
+
+[strings.ru]
+"Weather" = "Погода"
+"Wide" = "Широкий"
+"Updating…" = "Обновление…"
+"Clear" = "Ясно"
+"Partly cloudy" = "Переменная облачность"
+"Cloudy" = "Облачно"
+"Fog" = "Туман"
+"Rain" = "Дождь"
+"Snow" = "Снег"
+"Thunderstorm" = "Гроза"
+"Automatic" = "Автоматически"
+"City" = "Город"
+
+[strings.uk]
+"Weather" = "Погода"
+"Wide" = "Широкий"
+"Updating…" = "Оновлення…"
+"Clear" = "Ясно"
+"Partly cloudy" = "Мінлива хмарність"
+"Cloudy" = "Хмарно"
+"Fog" = "Туман"
+"Rain" = "Дощ"
+"Snow" = "Сніг"
+"Thunderstorm" = "Гроза"
+"Automatic" = "Автоматично"
+"City" = "Місто"
+
+[strings.de]
+"Weather" = "Wetter"
+"Wide" = "Breit"
+"Updating…" = "Wird aktualisiert…"
+"Clear" = "Klar"
+"Partly cloudy" = "Teilweise bewölkt"
+"Cloudy" = "Bewölkt"
+"Fog" = "Nebel"
+"Rain" = "Regen"
+"Snow" = "Schnee"
+"Thunderstorm" = "Gewitter"
+"Automatic" = "Automatisch"
+"City" = "Stadt"
+
+[strings.fr]
+"Weather" = "Météo"
+"Wide" = "Large"
+"Updating…" = "Mise à jour…"
+"Clear" = "Dégagé"
+"Partly cloudy" = "Partiellement nuageux"
+"Cloudy" = "Nuageux"
+"Fog" = "Brouillard"
+"Rain" = "Pluie"
+"Snow" = "Neige"
+"Thunderstorm" = "Orage"
+"Automatic" = "Automatique"
+"City" = "Ville"
+
+[strings.es]
+"Weather" = "Tiempo"
+"Wide" = "Ancho"
+"Updating…" = "Actualizando…"
+"Clear" = "Despejado"
+"Partly cloudy" = "Parcialmente nublado"
+"Cloudy" = "Nublado"
+"Fog" = "Niebla"
+"Rain" = "Lluvia"
+"Snow" = "Nieve"
+"Thunderstorm" = "Tormenta"
+"Automatic" = "Automática"
+"City" = "Ciudad"
+
+[strings.it]
+"Weather" = "Meteo"
+"Wide" = "Largo"
+"Updating…" = "Aggiornamento…"
+"Clear" = "Sereno"
+"Partly cloudy" = "Parzialmente nuvoloso"
+"Cloudy" = "Nuvoloso"
+"Fog" = "Nebbia"
+"Rain" = "Pioggia"
+"Snow" = "Neve"
+"Thunderstorm" = "Temporale"
+"Automatic" = "Automatica"
+"City" = "Città"
+
+[strings.pt]
+"Weather" = "Clima"
+"Wide" = "Largo"
+"Updating…" = "Atualizando…"
+"Clear" = "Céu limpo"
+"Partly cloudy" = "Parcialmente nublado"
+"Cloudy" = "Nublado"
+"Fog" = "Nevoeiro"
+"Rain" = "Chuva"
+"Snow" = "Neve"
+"Thunderstorm" = "Trovoada"
+"Automatic" = "Automática"
+"City" = "Cidade"
+
+[strings.pl]
+"Weather" = "Pogoda"
+"Wide" = "Szeroki"
+"Updating…" = "Aktualizowanie…"
+"Clear" = "Bezchmurnie"
+"Partly cloudy" = "Częściowe zachmurzenie"
+"Cloudy" = "Pochmurno"
+"Fog" = "Mgła"
+"Rain" = "Deszcz"
+"Snow" = "Śnieg"
+"Thunderstorm" = "Burza"
+"Automatic" = "Automatycznie"
+"City" = "Miasto"
+
+[strings.zh]
+"Weather" = "天气"
+"Wide" = "宽"
+"Updating…" = "正在更新…"
+"Clear" = "晴"
+"Partly cloudy" = "多云"
+"Cloudy" = "阴"
+"Fog" = "雾"
+"Rain" = "雨"
+"Snow" = "雪"
+"Thunderstorm" = "雷暴"
+"Automatic" = "自动"
+"City" = "城市"
+
+[strings.ja]
+"Weather" = "天気"
+"Wide" = "ワイド"
+"Updating…" = "更新中…"
+"Clear" = "晴れ"
+"Partly cloudy" = "晴れ時々曇り"
+"Cloudy" = "曇り"
+"Fog" = "霧"
+"Rain" = "雨"
+"Snow" = "雪"
+"Thunderstorm" = "雷雨"
+"Automatic" = "自動"
+"City" = "都市"
+
+[strings.ko]
+"Weather" = "날씨"
+"Wide" = "와이드"
+"Updating…" = "업데이트 중…"
+"Clear" = "맑음"
+"Partly cloudy" = "구름 조금"
+"Cloudy" = "흐림"
+"Fog" = "안개"
+"Rain" = "비"
+"Snow" = "눈"
+"Thunderstorm" = "뇌우"
+"Automatic" = "자동"
+"City" = "도시"

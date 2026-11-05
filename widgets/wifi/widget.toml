@@ -1,0 +1,74 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.wifi"
+name = "Wi-Fi"
+category = "System"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Wi-Fi" = "Wi-Fi"
+"On" = "Вкл."
+"Off" = "Выкл."
+
+[strings.uk]
+"Wi-Fi" = "Wi-Fi"
+"On" = "Увімк."
+"Off" = "Вимк."
+
+[strings.de]
+"Wi-Fi" = "WLAN"
+"On" = "Ein"
+"Off" = "Aus"
+
+[strings.fr]
+"Wi-Fi" = "Wi-Fi"
+"On" = "Activé"
+"Off" = "Désactivé"
+
+[strings.es]
+"Wi-Fi" = "Wi-Fi"
+"On" = "Activado"
+"Off" = "Desactivado"
+
+[strings.it]
+"Wi-Fi" = "Wi-Fi"
+"On" = "Attivo"
+"Off" = "Disattivo"
+
+[strings.pt]
+"Wi-Fi" = "Wi-Fi"
+"On" = "Ativado"
+"Off" = "Desativado"
+
+[strings.pl]
+"Wi-Fi" = "Wi-Fi"
+"On" = "Wł."
+"Off" = "Wył."
+
+[strings.zh]
+"Wi-Fi" = "Wi-Fi"
+"On" = "开"
+"Off" = "关"
+
+[strings.ja]
+"Wi-Fi" = "Wi-Fi"
+"On" = "オン"
+"Off" = "オフ"
+
+[strings.ko]
+"Wi-Fi" = "Wi-Fi"
+"On" = "켬"
+"Off" = "끔"

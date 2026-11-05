@@ -1,0 +1,60 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <column padding="14" gap="10" width="fill" height="fill">
+    <row gap="10" width="fill" grow="1">
+      <row grow="1" height="fill" gap="10" align="center" padding="0 10" radius="18" fill="#8080801A">
+      <stack width="38" height="38" action="wifi" scale="1" pressed.scale="0.88" transition="spring">
+      <ellipse if="app.wifi" width="fill" height="fill" fill="accent"/>
+      <ellipse if="!app.wifi" width="fill" height="fill" fill="#80808030"/>
+      <image if="app.wifi" src="assets/wifi-on.svg" width="19" height="19"/>
+      <image if="!app.wifi" src="assets/wifi.svg" width="19" height="19"/>
+    </stack>
+      <column grow="1">
+        <text value="{str.Wi-Fi}" size="12" weight="600" ellipsis="true" width="fill"/>
+        <text if="app.wifi" value="{str.On}" size="12" color="secondary"/>
+        <text if="!app.wifi" value="{str.Off}" size="12" color="secondary"/>
+      </column>
+    </row>
+      <row grow="1" height="fill" gap="10" align="center" padding="0 10" radius="18" fill="#8080801A">
+      <stack width="38" height="38" action="bluetooth" scale="1" pressed.scale="0.88" transition="spring">
+      <ellipse if="app.bt" width="fill" height="fill" fill="accent"/>
+      <ellipse if="!app.bt" width="fill" height="fill" fill="#80808030"/>
+      <image if="app.bt" src="assets/bluetooth-on.svg" width="19" height="19"/>
+      <image if="!app.bt" src="assets/bluetooth.svg" width="19" height="19"/>
+    </stack>
+      <column grow="1">
+        <text value="{str.Bluetooth}" size="12" weight="600" ellipsis="true" width="fill"/>
+        <text if="app.bt" value="{str.On}" size="12" color="secondary"/>
+        <text if="!app.bt" value="{str.Off}" size="12" color="secondary"/>
+      </column>
+    </row>
+    </row>
+    <row gap="10" width="fill" grow="1">
+      <row grow="1" height="fill" gap="10" align="center" padding="0 10" radius="18" fill="#8080801A">
+      <stack width="38" height="38" action="saver" scale="1" pressed.scale="0.88" transition="spring">
+      <ellipse if="app.saver" width="fill" height="fill" fill="accent"/>
+      <ellipse if="!app.saver" width="fill" height="fill" fill="#80808030"/>
+      <image if="app.saver" src="assets/leaf-on.svg" width="19" height="19"/>
+      <image if="!app.saver" src="assets/leaf.svg" width="19" height="19"/>
+    </stack>
+      <column grow="1">
+        <text value="{str.Saver}" size="12" weight="600" ellipsis="true" width="fill"/>
+        <text if="app.saver" value="{str.On}" size="12" color="secondary"/>
+        <text if="!app.saver" value="{str.Off}" size="12" color="secondary"/>
+      </column>
+    </row>
+      <row grow="1" height="fill" gap="10" align="center" padding="0 10" radius="18" fill="#8080801A">
+      <stack width="38" height="38" action="airplane" scale="1" pressed.scale="0.88" transition="spring">
+      <ellipse if="app.plane" width="fill" height="fill" fill="accent"/>
+      <ellipse if="!app.plane" width="fill" height="fill" fill="#80808030"/>
+      <image if="app.plane" src="assets/airplane-on.svg" width="19" height="19"/>
+      <image if="!app.plane" src="assets/airplane.svg" width="19" height="19"/>
+    </stack>
+      <column grow="1">
+        <text value="{str.Airplane}" size="12" weight="600" ellipsis="true" width="fill"/>
+        <text if="app.plane" value="{str.On}" size="12" color="secondary"/>
+        <text if="!app.plane" value="{str.Off}" size="12" color="secondary"/>
+      </column>
+    </row>
+    </row>
+  </column>
+</widget>

@@ -1,0 +1,17 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <column padding="14 16 14 16" width="fill" height="fill">
+    <text value="{app.city}" size="14" weight="600" ellipsis="true" width="fill"/>
+    <text if="app.temp" value="{app.temp}" size="42" weight="300" features="tnum"/>
+    <text if="!app.temp" value="{str.Updating…}" size="13" color="secondary"/>
+    <spacer grow="1"/>
+    <image if="app.icon" src="assets/{app.icon}.svg" width="26" height="26"/>
+        <text if="app.k_clear" value="{str.Clear}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
+        <text if="app.k_partly" value="{str.Partly cloudy}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
+        <text if="app.k_cloud" value="{str.Cloudy}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
+        <text if="app.k_fog" value="{str.Fog}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
+        <text if="app.k_rain" value="{str.Rain}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
+        <text if="app.k_snow" value="{str.Snow}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
+        <text if="app.k_storm" value="{str.Thunderstorm}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
+    <text if="app.temp" value="↑{app.hi}  ↓{app.lo}" size="12" color="secondary" features="tnum"/>
+  </column>
+</widget>

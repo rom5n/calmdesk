@@ -1,0 +1,97 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.battery"
+name = "Battery"
+variant = "Small"
+category = "System"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Battery" = "Батарея"
+"Small" = "Маленький"
+"Charging" = "Заряжается"
+"Plugged in" = "От сети"
+"On battery" = "От батареи"
+
+[strings.uk]
+"Battery" = "Акумулятор"
+"Small" = "Малий"
+"Charging" = "Заряджається"
+"Plugged in" = "Від мережі"
+"On battery" = "Від акумулятора"
+
+[strings.de]
+"Battery" = "Akku"
+"Small" = "Klein"
+"Charging" = "Wird geladen"
+"Plugged in" = "Angeschlossen"
+"On battery" = "Akkubetrieb"
+
+[strings.fr]
+"Battery" = "Batterie"
+"Small" = "Petit"
+"Charging" = "En charge"
+"Plugged in" = "Branché"
+"On battery" = "Sur batterie"
+
+[strings.es]
+"Battery" = "Batería"
+"Small" = "Pequeño"
+"Charging" = "Cargando"
+"Plugged in" = "Conectado"
+"On battery" = "Con batería"
+
+[strings.it]
+"Battery" = "Batteria"
+"Small" = "Piccolo"
+"Charging" = "In carica"
+"Plugged in" = "Collegato"
+"On battery" = "A batteria"
+
+[strings.pt]
+"Battery" = "Bateria"
+"Small" = "Pequeno"
+"Charging" = "Carregando"
+"Plugged in" = "Conectado"
+"On battery" = "Na bateria"
+
+[strings.pl]
+"Battery" = "Bateria"
+"Small" = "Mały"
+"Charging" = "Ładowanie"
+"Plugged in" = "Podłączono"
+"On battery" = "Na baterii"
+
+[strings.zh]
+"Battery" = "电池"
+"Small" = "小"
+"Charging" = "正在充电"
+"Plugged in" = "已接通电源"
+"On battery" = "使用电池"
+
+[strings.ja]
+"Battery" = "バッテリー"
+"Small" = "小"
+"Charging" = "充電中"
+"Plugged in" = "電源接続"
+"On battery" = "バッテリー駆動"
+
+[strings.ko]
+"Battery" = "배터리"
+"Small" = "작게"
+"Charging" = "충전 중"
+"Plugged in" = "전원 연결됨"
+"On battery" = "배터리 사용"

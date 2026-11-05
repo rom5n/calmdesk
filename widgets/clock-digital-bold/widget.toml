@@ -1,0 +1,64 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.clock-digital-bold"
+name = "Digital Clock"
+variant = "Big digits"
+category = "Time"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Digital Clock" = "Цифровые часы"
+"Big digits" = "Крупные цифры"
+
+[strings.uk]
+"Digital Clock" = "Цифровий годинник"
+"Big digits" = "Великі цифри"
+
+[strings.de]
+"Digital Clock" = "Digitaluhr"
+"Big digits" = "Große Ziffern"
+
+[strings.fr]
+"Digital Clock" = "Horloge numérique"
+"Big digits" = "Grands chiffres"
+
+[strings.es]
+"Digital Clock" = "Reloj digital"
+"Big digits" = "Dígitos grandes"
+
+[strings.it]
+"Digital Clock" = "Orologio digitale"
+"Big digits" = "Cifre grandi"
+
+[strings.pt]
+"Digital Clock" = "Relógio digital"
+"Big digits" = "Dígitos grandes"
+
+[strings.pl]
+"Digital Clock" = "Zegar cyfrowy"
+"Big digits" = "Duże cyfry"
+
+[strings.zh]
+"Digital Clock" = "数字时钟"
+"Big digits" = "大数字"
+
+[strings.ja]
+"Digital Clock" = "デジタル時計"
+"Big digits" = "大きな数字"
+
+[strings.ko]
+"Digital Clock" = "디지털 시계"
+"Big digits" = "큰 숫자"
