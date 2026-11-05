@@ -178,7 +178,7 @@ impl Gallery {
 
             // Sidebar: the logo, categories with icons, a hairline on its edge.
             // ponytail: decodes the 256 px logo on every redraw (about 1 ms); keep the bitmap if hover redraws lag.
-            let logo = widget_engine::load_image(ctx, include_bytes!("../assets/logo.png"))?;
+            let logo = widget_engine::load_image(ctx, if theme.dark { include_bytes!("../assets/logo-dark.png").as_slice() } else { include_bytes!("../assets/logo.png") })?;
             let (lx, ly, ls) = LOGO;
             ctx.DrawBitmap(&logo, Some(&rect(lx, ly, lx + ls, ly + ls)), 1.0, D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC, None, None);
             ctx.FillRectangle(&rect(SIDE, 20.0, SIDE + 1.0, SIZE.1 - 20.0), &brush(ink(0.08))?);

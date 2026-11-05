@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="crates/manager/assets/logo-dark.svg">
+    <img src="crates/manager/assets/logo.svg" width="120" alt="Calmdesk logo">
+  </picture>
+</p>
+
 # Calmdesk
 
 **Your desktop, beautifully alive. The widget center Windows 11 deserves.**

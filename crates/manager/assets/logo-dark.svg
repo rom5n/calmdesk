@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6.1 -2.1 96 96" width="1024" height="1024">
+<!-- Calmdesk logo, for dark backgrounds: a widget lifting out of the grid. -->
+<rect x="12" y="12" width="34" height="34" rx="9" fill="#E9E7E1"/>
+<rect x="12" y="54" width="34" height="34" rx="9" fill="#E9E7E1"/>
+<rect x="54" y="54" width="34" height="34" rx="9" fill="#E9E7E1"/>
+<rect x="54" y="12" width="34" height="34" rx="9" fill="#5D7BFF" transform="translate(5 -5) rotate(12 71 29)"/>
+</svg>

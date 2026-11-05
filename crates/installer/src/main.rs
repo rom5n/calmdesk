@@ -230,8 +230,8 @@ impl Setup {
                 };
                 match part {
                     LOGO => {
-                        // The app icon. The image has a transparent margin for its shadow.
-                        let logo = widget_engine::load_image(ctx, include_bytes!("../../manager/assets/logo.png"))?;
+                        // The app logo, light or dark to match the theme.
+                        let logo = widget_engine::load_image(ctx, if theme.dark { include_bytes!("../../manager/assets/logo-dark.png").as_slice() } else { include_bytes!("../../manager/assets/logo.png") })?;
                         let (s, l, t) = (104.0, (SIZE.0 - 104.0) / 2.0, 30.0);
                         ctx.DrawBitmap(&logo, Some(&D2D_RECT_F { left: l, top: t, right: l + s, bottom: t + s }), 1.0, D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC, None, None);
                     }
