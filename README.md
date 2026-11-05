@@ -2,6 +2,16 @@
 
 Desktop widgets for Windows 11, built on [widget-engine](https://github.com/rom5n/widget-engine).
 
+![Clocks, calendar, smart stack, timers](docs/images/time.png)
+
+![Battery, switches, screen time, system monitor, device battery](docs/images/system.png)
+
+![Notes, tasks, photos, weather, events, Now Playing, exchange rates](docs/images/more.png)
+
+*Every built-in widget, in liquid glass with the light theme.*
+
+**Download:** the installer is on the [Releases](https://github.com/rom5n/calmdesk/releases) page.
+
 A tray app that hosts the widgets: a gallery of every widget package on the PC (built-in
 and the ones other apps install) with a search field, drag a widget out onto the desktop or
 click it to add it. A new widget starts with the style last picked for that kind of widget.
@@ -78,4 +88,4 @@ git clone https://github.com/rom5n/calmdesk calmdesk
 
 ## License
 
-MIT OR Apache-2.0.
+MIT ([LICENSE-MIT](LICENSE-MIT)) or Apache-2.0 ([LICENSE-APACHE](LICENSE-APACHE)), at your option.

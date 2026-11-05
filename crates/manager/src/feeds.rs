@@ -348,10 +348,17 @@ impl Worker {
                     save_weather(&city, &v);
                     self.weather.insert(city.clone(), (v, Instant::now(), false));
                 }
-                // Offline: the last forecast, from disk after a restart. Try again in two minutes.
+                // Offline: the last forecast, from disk after a restart. Try again in two minutes,
+                // or in 15 seconds with nothing to show.
                 None => {
-                    let old = self.weather.remove(&city).map(|(v, ..)| v).filter(|v| !v.is_empty()).unwrap_or_else(|| load_weather(&city));
-                    let at = Instant::now().checked_sub(WEATHER_EVERY - Duration::from_secs(120)).unwrap_or_else(Instant::now);
+                    let mut old = self.weather.remove(&city).map(|(v, ..)| v).filter(|v| !v.is_empty()).unwrap_or_else(|| load_weather(&city));
+                    // Saved in the language of that time: the city's name in today's.
+                    let name = city.rsplit('/').next().unwrap_or(&city);
+                    if let Some(&(known, ..)) = WEATHER_CITIES.iter().find(|c| c.0 == name) {
+                        old.iter_mut().filter(|(k, _)| k == "city").for_each(|(_, v)| *v = widget_engine::tr(known).to_string());
+                    }
+                    let wait = Duration::from_secs(if old.is_empty() { 15 } else { 120 });
+                    let at = Instant::now().checked_sub(WEATHER_EVERY - wait).unwrap_or_else(Instant::now);
                     self.weather.insert(city.clone(), (old, at, true));
                 }
             }

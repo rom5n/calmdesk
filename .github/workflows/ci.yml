@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      # Calmdesk builds against widget-engine checked out next to it.
+      - uses: actions/checkout@v4
+        with:
+          path: calmdesk
+      - uses: actions/checkout@v4
+        with:
+          repository: rom5n/widget-engine
+          path: engine
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: calmdesk
+      - run: cargo test -p calmdesk -p media
+        working-directory: calmdesk
+      - run: cargo build --release -p calmdesk
+        working-directory: calmdesk
+      - run: cargo build --release -p calmdesk-setup
+        working-directory: calmdesk
