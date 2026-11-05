@@ -10,6 +10,7 @@
 mod catalog;
 mod feeds;
 mod gallery;
+mod log;
 mod shell;
 mod remote;
 mod timers;
@@ -241,6 +242,9 @@ fn on_action(id: &str, action: &str) {
 }
 
 fn main() -> windows::core::Result<()> {
+    // Before the log, which creates the data folder the old one moves to.
+    let moved = migrate();
+    log::start(&data_dir());
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args.iter().any(|a| a == "--uninstall") {
         shell::uninstall();
@@ -259,7 +263,7 @@ fn main() -> windows::core::Result<()> {
         return Ok(());
     }
 
-    if migrate() {
+    if moved {
         shell::migrate();
     }
     let mut engine = Engine::new();
