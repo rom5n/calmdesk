@@ -42,8 +42,9 @@ pub fn remove(id: &str) {
 /// A message from an app (tray window, UI thread). `from`: its window, for the clicks.
 pub fn message(from: HWND, fields: &[String]) {
     let package = match fields {
-        [kind, package] if kind == "hello" => package,
-        [kind, package, key, value] if kind == "set" => {
+        // Later protocol versions may add fields at the end: ignored.
+        [kind, package, ..] if kind == "hello" => package,
+        [kind, package, key, value, ..] if kind == "set" => {
             VALUES.with_borrow_mut(|v| {
                 let keys = v.entry(package.clone()).or_default();
                 if keys.len() < MAX_KEYS || keys.contains_key(key) {

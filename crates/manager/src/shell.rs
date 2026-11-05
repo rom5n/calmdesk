@@ -119,7 +119,7 @@ extern "system" fn tray_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARA
             WM_COPYDATA => match widget_engine::host::decode(lparam) {
                 Some(fields) => {
                     handle(Request::Remote(HWND(wparam.0 as _), fields));
-                    LRESULT(1)
+                    LRESULT(widget_engine::host::VERSION as isize)
                 }
                 None => LRESULT(0),
             },
