@@ -189,7 +189,7 @@ pub fn sample(package_id: &str) -> Values {
         Some(Kind::World) => world_values(""),
         Some(Kind::Monitor) => own(&[("cpu", "23"), ("cpu_t", "23%"), ("ram", "58"), ("ram_t", "58%"), ("gpu", "12"), ("gpu_t", "12%")]),
         Some(Kind::Devices) => own(&[("n0", "Headphones"), ("p0", "80"), ("b0", "80"), ("n1", "Mouse"), ("p1", "45"), ("b1", "45"), ("n2", "Keyboard"), ("p2", "100"), ("b2", "100")]),
-        Some(Kind::Currency) => own(&[("base", "USD"), ("c0", "EUR"), ("r0", "0.8910"), ("c1", "GBP"), ("r1", "0.7430"), ("c2", "JPY"), ("r2", "158.46"), ("c3", "CNY"), ("r3", "6.67")]),
+        Some(Kind::Currency) => own(&[("base", "USD"), ("c0", "EUR"), ("r0", "0.8910"), ("c1", "RUB"), ("r1", "81.8"), ("c2", "GBP"), ("r2", "0.7430"), ("c3", "CNY"), ("r3", "6.67")]),
         Some(Kind::Events(_)) => {
             let at = |day: &str, h: &str, t: &str| crate::events::Event { start: format!("{day}{h}"), all_day: h == "0000", title: tr(t).into() };
             let mut v = crate::events::values(&[
@@ -839,11 +839,12 @@ pub(crate) fn curl(url: &str) -> Option<String> {
     out.status.success().then(|| String::from_utf8_lossy(&out.stdout).into_owned())
 }
 
-/// One unit of `base` in the first four other currencies of the widget's list.
+/// One unit of `base` in the first four other currencies of the widget's list. Rates By
+/// Exchange Rate API (open.er-api.com, no key, daily rates).
 fn fetch_rates(base: &str) -> Option<Values> {
-    const CODES: [&str; 8] = ["USD", "EUR", "GBP", "JPY", "CNY", "CHF", "PLN", "CAD"];
+    const CODES: [&str; 9] = ["USD", "EUR", "RUB", "GBP", "CNY", "JPY", "CHF", "PLN", "CAD"];
     let to: Vec<&str> = CODES.iter().copied().filter(|c| *c != base).take(4).collect();
-    let json = curl(&format!("https://api.frankfurter.dev/v1/latest?base={base}&symbols={}", to.join(",")))?;
+    let json = curl(&format!("https://open.er-api.com/v6/latest/{base}"))?;
     let rates = section(&json, "rates");
     let mut v = Values::new();
     for (i, code) in to.iter().enumerate() {
@@ -887,7 +888,7 @@ fn weekday(date: &str) -> String {
     let mut parts = date.split('-').map(|p| p.parse::<u16>().unwrap_or(1));
     let st = SYSTEMTIME { wYear: parts.next().unwrap_or(2000), wMonth: parts.next().unwrap_or(1), wDay: parts.next().unwrap_or(1), ..Default::default() };
     let mut buf = [0u16; 32];
-    let n = unsafe { GetDateFormatEx(None, ENUM_DATE_FORMATS_FLAGS(0), Some(&st), w!("ddd"), Some(&mut buf), None) };
+    let n = unsafe { GetDateFormatEx(widget_engine::locale(), ENUM_DATE_FORMATS_FLAGS(0), Some(&st), w!("ddd"), Some(&mut buf), None) };
     String::from_utf16_lossy(&buf[..(n.max(1) - 1) as usize])
 }
 

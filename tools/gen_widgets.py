@@ -691,13 +691,13 @@ pkg('bluetooth-battery', 'Device battery', 'System', (170, 170), f'''
   </column>''', keys=['No Bluetooth devices with a battery'], allow=('size', 'background', 'theme', 'font', 'colors'),
     assets={f'b{i}.svg': bar(f'b{i}') for i in range(3)})
 
-CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CHF', 'PLN', 'CAD']
+CURRENCIES = ['USD', 'EUR', 'RUB', 'GBP', 'CNY', 'JPY', 'CHF', 'PLN', 'CAD']
 rates = '\n'.join(f'''    <row if="app.c{i}" width="fill">
       <text value="{{app.c{i}}}" size="13" weight="600" color="secondary" grow="1"/>
       <text value="{{app.r{i}}}" size="13" weight="700" features="tnum"/>
     </row>''' for i in range(4))
 pkg('currency', 'Exchange rates', 'Productivity', (170, 170), f'''
-  <!-- European Central Bank rates (frankfurter.dev) for one unit of the base currency, hourly. -->
+  <!-- Rates By Exchange Rate API (open.er-api.com) for one unit of the base currency, hourly. -->
   <column padding="14 16 14 16" gap="5" width="fill" height="fill">
     <row width="fill">
       <text value="{{str.Exchange rates}}" size="13" weight="600" color="secondary" ellipsis="true" grow="1"/>
@@ -733,8 +733,9 @@ dots = '\n'.join(f'''      <ellipse if="app.p{i}" width="6" height="6" fill="acc
       <ellipse if="!app.p{i}" width="6" height="6" fill="#8080805A"/>''' for i in range(3))
 stack_meters = '\n'.join(meter(k, lb, '      ') for k, lb in METERS[:2])
 pkg('smart-stack', 'Smart stack', 'Time', (170, 170), f'''
-  <!-- Clock, weather and system load in turns, every 15 seconds; a click shows the next. -->
-  <column padding="14 16 10 16" gap="4" width="fill" height="fill" action="page">
+  <!-- Clock, weather and system load in turns, every 15 seconds; a click on the dots shows the
+       next. The rest of the card is free for double-click and hold, which moves the widget. -->
+  <column padding="14 16 6 16" gap="2" width="fill" height="fill">
     <column if="app.p0" grow="1" width="fill" justify="center" gap="2">
       <text fit="true" value="{{clock.time}}" size="44" weight="700" features="tnum"/>
       <text value="{{clock.date}}" size="13" color="secondary" ellipsis="true" width="fill"/>
@@ -752,12 +753,12 @@ pkg('smart-stack', 'Smart stack', 'Time', (170, 170), f'''
     <column if="app.p2" grow="1" width="fill" gap="7" justify="center">
 {stack_meters}
     </column>
-    <row gap="5" justify="center" width="fill">
+    <row gap="5" justify="center" align="center" padding="5 12" radius="10" fill="transparent" hover.fill="#8080802E" action="page">
 {dots}
     </row>
   </column>''', keys=['Updating…'] + [lb for _, lb in METERS[:2]],
     assets={**WEATHER, **{f'{k}.svg': bar(k) for k, _ in METERS[:2]}},
-    options=[('rotate', 'Rotate automatically', None, 'on', None)])
+    options=WEATHER_OPTIONS + [('rotate', 'Rotate automatically', None, 'on', None)])
 
 import shutil
 for gone in ['clock-clear', 'clock-clear-stacked', 'clock-clear-weekday']:

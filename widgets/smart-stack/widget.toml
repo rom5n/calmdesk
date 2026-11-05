@@ -19,6 +19,12 @@ weight = 400
 allow = ["size", "background", "theme", "font"]
 
 [[option]]
+key = "city"
+label = "City"
+values = [["auto", "Automatic"], ["Americas/Los Angeles", "Los Angeles"], ["Americas/Chicago", "Chicago"], ["Americas/New York", "New York"], ["Americas/Toronto", "Toronto"], ["Americas/São Paulo", "São Paulo"], ["Europe/London", "London"], ["Europe/Amsterdam", "Amsterdam"], ["Europe/Paris", "Paris"], ["Europe/Madrid", "Madrid"], ["Europe/Rome", "Rome"], ["Europe/Berlin", "Berlin"], ["Europe/Prague", "Prague"], ["Europe/Vienna", "Vienna"], ["Europe/Warsaw", "Warsaw"], ["Europe/Istanbul", "Istanbul"], ["Eastern Europe/Lviv", "Lviv"], ["Eastern Europe/Kyiv", "Kyiv"], ["Eastern Europe/Kharkiv", "Kharkiv"], ["Eastern Europe/Odesa", "Odesa"], ["Eastern Europe/Minsk", "Minsk"], ["Eastern Europe/Saint Petersburg", "Saint Petersburg"], ["Eastern Europe/Moscow", "Moscow"], ["Eastern Europe/Kazan", "Kazan"], ["Asia & Pacific/Yekaterinburg", "Yekaterinburg"], ["Asia & Pacific/Novosibirsk", "Novosibirsk"], ["Asia & Pacific/Almaty", "Almaty"], ["Asia & Pacific/Dubai", "Dubai"], ["Asia & Pacific/New Delhi", "New Delhi"], ["Asia & Pacific/Bangkok", "Bangkok"], ["Asia & Pacific/Singapore", "Singapore"], ["Asia & Pacific/Beijing", "Beijing"], ["Asia & Pacific/Seoul", "Seoul"], ["Asia & Pacific/Tokyo", "Tokyo"], ["Asia & Pacific/Sydney", "Sydney"]]
+default = "auto"
+
+[[option]]
 key = "rotate"
 label = "Rotate automatically"
 default = "on"
@@ -28,6 +34,8 @@ default = "on"
 "Updating…" = "Обновление…"
 "Processor" = "Процессор"
 "Memory" = "Память"
+"Automatic" = "Автоматически"
+"City" = "Город"
 "Rotate automatically" = "Листать автоматически"
 
 [strings.uk]
@@ -35,6 +43,8 @@ default = "on"
 "Updating…" = "Оновлення…"
 "Processor" = "Процесор"
 "Memory" = "Пам’ять"
+"Automatic" = "Автоматично"
+"City" = "Місто"
 "Rotate automatically" = "Гортати автоматично"
 
 [strings.de]
@@ -42,6 +52,8 @@ default = "on"
 "Updating…" = "Wird aktualisiert…"
 "Processor" = "Prozessor"
 "Memory" = "Arbeitsspeicher"
+"Automatic" = "Automatisch"
+"City" = "Stadt"
 "Rotate automatically" = "Automatisch wechseln"
 
 [strings.fr]
@@ -49,6 +61,8 @@ default = "on"
 "Updating…" = "Mise à jour…"
 "Processor" = "Processeur"
 "Memory" = "Mémoire"
+"Automatic" = "Automatique"
+"City" = "Ville"
 "Rotate automatically" = "Défilement automatique"
 
 [strings.es]
@@ -56,6 +70,8 @@ default = "on"
 "Updating…" = "Actualizando…"
 "Processor" = "Procesador"
 "Memory" = "Memoria"
+"Automatic" = "Automática"
+"City" = "Ciudad"
 "Rotate automatically" = "Rotar automáticamente"
 
 [strings.it]
@@ -63,6 +79,8 @@ default = "on"
 "Updating…" = "Aggiornamento…"
 "Processor" = "Processore"
 "Memory" = "Memoria"
+"Automatic" = "Automatica"
+"City" = "Città"
 "Rotate automatically" = "Ruota automaticamente"
 
 [strings.pt]
@@ -70,6 +88,8 @@ default = "on"
 "Updating…" = "Atualizando…"
 "Processor" = "Processador"
 "Memory" = "Memória"
+"Automatic" = "Automática"
+"City" = "Cidade"
 "Rotate automatically" = "Alternar automaticamente"
 
 [strings.pl]
@@ -77,6 +97,8 @@ default = "on"
 "Updating…" = "Aktualizowanie…"
 "Processor" = "Procesor"
 "Memory" = "Pamięć"
+"Automatic" = "Automatycznie"
+"City" = "Miasto"
 "Rotate automatically" = "Przełączaj automatycznie"
 
 [strings.zh]
@@ -84,6 +106,8 @@ default = "on"
 "Updating…" = "正在更新…"
 "Processor" = "处理器"
 "Memory" = "内存"
+"Automatic" = "自动"
+"City" = "城市"
 "Rotate automatically" = "自动轮换"
 
 [strings.ja]
@@ -91,6 +115,8 @@ default = "on"
 "Updating…" = "更新中…"
 "Processor" = "プロセッサ"
 "Memory" = "メモリ"
+"Automatic" = "自動"
+"City" = "都市"
 "Rotate automatically" = "自動で切り替え"
 
 [strings.ko]
@@ -98,4 +124,6 @@ default = "on"
 "Updating…" = "업데이트 중…"
 "Processor" = "프로세서"
 "Memory" = "메모리"
+"Automatic" = "자동"
+"City" = "도시"
 "Rotate automatically" = "자동으로 전환"

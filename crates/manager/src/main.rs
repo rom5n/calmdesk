@@ -288,7 +288,7 @@ fn tray_menu() -> Vec<MenuItem> {
         items.push(MenuItem::new(tr("Remove all widgets"), "remove-all").danger());
     }
     let lang = setting("lang").unwrap_or_default();
-    let mut languages = vec![MenuItem::new(tr("System|language"), "lang:").checked(lang.is_empty())];
+    let mut languages = vec![MenuItem::new(tr("System default"), "lang:").checked(lang.is_empty())];
     languages.extend(LANGUAGES.iter().map(|(code, name)| MenuItem::new(name, &format!("lang:{code}")).checked(lang == *code)));
     let settings = vec![
         MenuItem::new(tr("Start with Windows"), "autostart").checked(shell::autostart()),

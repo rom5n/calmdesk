@@ -1,5 +1,5 @@
 <widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
-  <!-- European Central Bank rates (frankfurter.dev) for one unit of the base currency, hourly. -->
+  <!-- Rates By Exchange Rate API (open.er-api.com) for one unit of the base currency, hourly. -->
   <column padding="14 16 14 16" gap="5" width="fill" height="fill">
     <row width="fill">
       <text value="{str.Exchange rates}" size="13" weight="600" color="secondary" ellipsis="true" grow="1"/>

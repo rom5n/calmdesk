@@ -16,7 +16,7 @@ rates, calendar events (iCalendar links, such as a Google or Outlook calendar's 
 address) and a smart stack (clock, weather and load in turns). The app feeds them
 (`crates/manager/src/feeds.rs`, `timers.rs`, `sensors.rs`, `events.rs`); weather comes from
 Open-Meteo for the city of the PC's IP address (ipinfo.io), and the last forecast is shown
-offline; rates from frankfurter.dev (European Central Bank).
+offline; rates by Exchange Rate API (open.er-api.com).
 
 The tray menu's Settings: start with Windows, hide widgets during fullscreen apps (only on
 that app's monitor), language, export and import (through `Documents\Calmdesk backup`), the
