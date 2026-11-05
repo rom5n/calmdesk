@@ -1,0 +1,85 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.events"
+name = "Events"
+category = "Productivity"
+engine = "^0.1"
+size = [352, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font"]
+
+[strings.ru]
+"Events" = "События"
+"Click the title to add a calendar link" = "Нажмите на заголовок, чтобы добавить ссылку на календарь"
+"No upcoming events" = "Нет предстоящих событий"
+"All day" = "Весь день"
+
+[strings.uk]
+"Events" = "Події"
+"Click the title to add a calendar link" = "Натисніть на заголовок, щоб додати посилання на календар"
+"No upcoming events" = "Немає найближчих подій"
+"All day" = "Увесь день"
+
+[strings.de]
+"Events" = "Termine"
+"Click the title to add a calendar link" = "Auf den Titel klicken, um einen Kalenderlink hinzuzufügen"
+"No upcoming events" = "Keine anstehenden Termine"
+"All day" = "Ganztägig"
+
+[strings.fr]
+"Events" = "Événements"
+"Click the title to add a calendar link" = "Cliquez sur le titre pour ajouter un lien d’agenda"
+"No upcoming events" = "Aucun événement à venir"
+"All day" = "Toute la journée"
+
+[strings.es]
+"Events" = "Eventos"
+"Click the title to add a calendar link" = "Haz clic en el título para añadir un enlace de calendario"
+"No upcoming events" = "No hay eventos próximos"
+"All day" = "Todo el día"
+
+[strings.it]
+"Events" = "Eventi"
+"Click the title to add a calendar link" = "Fai clic sul titolo per aggiungere un link al calendario"
+"No upcoming events" = "Nessun evento in programma"
+"All day" = "Tutto il giorno"
+
+[strings.pt]
+"Events" = "Eventos"
+"Click the title to add a calendar link" = "Clique no título para adicionar um link de agenda"
+"No upcoming events" = "Nenhum evento próximo"
+"All day" = "Dia inteiro"
+
+[strings.pl]
+"Events" = "Wydarzenia"
+"Click the title to add a calendar link" = "Kliknij tytuł, aby dodać link do kalendarza"
+"No upcoming events" = "Brak nadchodzących wydarzeń"
+"All day" = "Cały dzień"
+
+[strings.zh]
+"Events" = "日程"
+"Click the title to add a calendar link" = "单击标题以添加日历链接"
+"No upcoming events" = "没有即将到来的日程"
+"All day" = "全天"
+
+[strings.ja]
+"Events" = "予定"
+"Click the title to add a calendar link" = "タイトルをクリックしてカレンダーのリンクを追加"
+"No upcoming events" = "今後の予定はありません"
+"All day" = "終日"
+
+[strings.ko]
+"Events" = "일정"
+"Click the title to add a calendar link" = "제목을 클릭하여 캘린더 링크 추가"
+"No upcoming events" = "예정된 일정 없음"
+"All day" = "종일"

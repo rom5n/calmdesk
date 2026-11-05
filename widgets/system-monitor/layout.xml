@@ -1,0 +1,28 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- Load of this PC, read by the app every two seconds. -->
+  <column padding="14 16 16 16" gap="7" width="fill" height="fill">
+    <text value="{str.System monitor}" size="13" weight="600" color="secondary" ellipsis="true" width="fill"/>
+    <spacer grow="1"/>
+    <column if="app.cpu_t" gap="3" width="fill">
+      <row width="fill">
+        <text value="{str.Processor}" size="12" weight="500" ellipsis="true" grow="1"/>
+        <text value="{app.cpu_t}" size="12" weight="700" features="tnum"/>
+      </row>
+      <image src="assets/cpu.svg" width="fill" height="6"/>
+    </column>
+    <column if="app.ram_t" gap="3" width="fill">
+      <row width="fill">
+        <text value="{str.Memory}" size="12" weight="500" ellipsis="true" grow="1"/>
+        <text value="{app.ram_t}" size="12" weight="700" features="tnum"/>
+      </row>
+      <image src="assets/ram.svg" width="fill" height="6"/>
+    </column>
+    <column if="app.gpu_t" gap="3" width="fill">
+      <row width="fill">
+        <text value="{str.Graphics}" size="12" weight="500" ellipsis="true" grow="1"/>
+        <text value="{app.gpu_t}" size="12" weight="700" features="tnum"/>
+      </row>
+      <image src="assets/gpu.svg" width="fill" height="6"/>
+    </column>
+  </column>
+</widget>

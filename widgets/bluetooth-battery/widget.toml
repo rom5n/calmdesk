@@ -1,0 +1,63 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.bluetooth-battery"
+name = "Device battery"
+category = "System"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font", "colors"]
+
+[strings.ru]
+"Device battery" = "Батарея устройств"
+"No Bluetooth devices with a battery" = "Нет Bluetooth-устройств с батареей"
+
+[strings.uk]
+"Device battery" = "Батарея пристроїв"
+"No Bluetooth devices with a battery" = "Немає Bluetooth-пристроїв з акумулятором"
+
+[strings.de]
+"Device battery" = "Gerätebatterie"
+"No Bluetooth devices with a battery" = "Keine Bluetooth-Geräte mit Akku"
+
+[strings.fr]
+"Device battery" = "Batterie des appareils"
+"No Bluetooth devices with a battery" = "Aucun appareil Bluetooth avec batterie"
+
+[strings.es]
+"Device battery" = "Batería de dispositivos"
+"No Bluetooth devices with a battery" = "No hay dispositivos Bluetooth con batería"
+
+[strings.it]
+"Device battery" = "Batteria dispositivi"
+"No Bluetooth devices with a battery" = "Nessun dispositivo Bluetooth con batteria"
+
+[strings.pt]
+"Device battery" = "Bateria de dispositivos"
+"No Bluetooth devices with a battery" = "Nenhum dispositivo Bluetooth com bateria"
+
+[strings.pl]
+"Device battery" = "Bateria urządzeń"
+"No Bluetooth devices with a battery" = "Brak urządzeń Bluetooth z baterią"
+
+[strings.zh]
+"Device battery" = "设备电量"
+"No Bluetooth devices with a battery" = "没有带电池的蓝牙设备"
+
+[strings.ja]
+"Device battery" = "デバイスのバッテリー"
+"No Bluetooth devices with a battery" = "バッテリー付き Bluetooth デバイスなし"
+
+[strings.ko]
+"Device battery" = "장치 배터리"
+"No Bluetooth devices with a battery" = "배터리가 있는 Bluetooth 장치 없음"

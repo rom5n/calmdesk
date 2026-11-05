@@ -14,6 +14,8 @@ media = { path = "../media" }
 version = "0.62"
 features = [
     "Devices_Radios",
+    "Win32_Devices_DeviceAndDriverInstallation",
+    "Win32_Devices_Properties",
     "Foundation_Collections",
     "Win32_Foundation",
     "Win32_Graphics_Direct2D",
@@ -25,6 +27,7 @@ features = [
     "Win32_System_Console",
     "Win32_System_Diagnostics_Debug",
     "Win32_System_LibraryLoader",
+    "Win32_System_Performance",
     "Win32_System_Power",
     "Win32_System_Registry",
     "Win32_System_SystemInformation",

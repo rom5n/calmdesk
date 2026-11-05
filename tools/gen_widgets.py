@@ -646,6 +646,119 @@ text = open(p, encoding='utf-8').read()
 if 'fit=' not in text:
     open(p, 'w', encoding='utf-8', newline='\n').write(text.replace('<text value="{clock.time}" size="56"', '<text fit="true" value="{clock.time}" size="56"'))
 
+# --- system monitor, device battery, exchange rates, events, smart stack ---------------------------
+def bar(key):
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">'
+            '<rect width="100%" height="100%" rx="3" fill="{foreground}" fill-opacity="0.14"/>'
+            f'<rect width="{{app.{key}}}%" height="100%" rx="3" fill="{{accent}}"/></svg>')
+
+
+def meter(key, label, indent='    '):
+    lines = [f'<column if="app.{key}_t" gap="3" width="fill">',
+             '  <row width="fill">',
+             f'    <text value="{{str.{label}}}" size="12" weight="500" ellipsis="true" grow="1"/>',
+             f'    <text value="{{app.{key}_t}}" size="12" weight="700" features="tnum"/>',
+             '  </row>',
+             f'  <image src="assets/{key}.svg" width="fill" height="6"/>',
+             '</column>']
+    return '\n'.join(indent + l for l in lines)
+
+
+METERS = [('cpu', 'Processor'), ('ram', 'Memory'), ('gpu', 'Graphics')]
+pkg('system-monitor', 'System monitor', 'System', (170, 170), '''
+  <!-- Load of this PC, read by the app every two seconds. -->
+  <column padding="14 16 16 16" gap="7" width="fill" height="fill">
+    <text value="{str.System monitor}" size="13" weight="600" color="secondary" ellipsis="true" width="fill"/>
+    <spacer grow="1"/>
+''' + '\n'.join(meter(k, lb) for k, lb in METERS) + '''
+  </column>''', keys=[lb for _, lb in METERS], allow=('size', 'background', 'theme', 'font', 'colors'),
+    assets={f'{k}.svg': bar(k) for k, _ in METERS})
+
+devices = '\n'.join(f'''    <column if="app.n{i}" gap="3" width="fill">
+      <row width="fill" gap="6">
+        <text value="{{app.n{i}}}" size="12" weight="500" ellipsis="true" grow="1"/>
+        <text value="{{app.p{i}}}%" size="12" weight="700" features="tnum"/>
+      </row>
+      <image src="assets/b{i}.svg" width="fill" height="6"/>
+    </column>''' for i in range(3))
+pkg('bluetooth-battery', 'Device battery', 'System', (170, 170), f'''
+  <!-- Battery levels Bluetooth devices report (headphones, mice, keyboards), every minute. -->
+  <column padding="14 16 16 16" gap="7" width="fill" height="fill">
+    <text value="{{str.Device battery}}" size="13" weight="600" color="secondary" ellipsis="true" width="fill"/>
+    <spacer grow="1"/>
+    <text if="!app.n0" value="{{str.No Bluetooth devices with a battery}}" size="12" color="secondary" width="fill"/>
+{devices}
+  </column>''', keys=['No Bluetooth devices with a battery'], allow=('size', 'background', 'theme', 'font', 'colors'),
+    assets={f'b{i}.svg': bar(f'b{i}') for i in range(3)})
+
+CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CHF', 'PLN', 'CAD']
+rates = '\n'.join(f'''    <row if="app.c{i}" width="fill">
+      <text value="{{app.c{i}}}" size="13" weight="600" color="secondary" grow="1"/>
+      <text value="{{app.r{i}}}" size="13" weight="700" features="tnum"/>
+    </row>''' for i in range(4))
+pkg('currency', 'Exchange rates', 'Productivity', (170, 170), f'''
+  <!-- European Central Bank rates (frankfurter.dev) for one unit of the base currency, hourly. -->
+  <column padding="14 16 14 16" gap="5" width="fill" height="fill">
+    <row width="fill">
+      <text value="{{str.Exchange rates}}" size="13" weight="600" color="secondary" ellipsis="true" grow="1"/>
+      <text value="1 {{app.base}}" size="13" weight="700" color="accent"/>
+    </row>
+    <spacer grow="1"/>
+    <text if="!app.c0" value="{{str.Updating…}}" size="12" color="secondary"/>
+{rates}
+  </column>''', keys=['Updating…'], allow=('size', 'background', 'theme', 'font', 'colors'),
+    options=[('base', 'Base currency', [(c, c) for c in CURRENCIES], 'USD', None)])
+
+events = '\n'.join(f'''    <row if="app.e{i}" gap="10" width="fill" align="center">
+      <column width="86">
+        <text value="{{app.d{i}}}" size="11" weight="600" color="accent" ellipsis="true" width="fill"/>
+        <text if="app.h{i}" value="{{app.h{i}}}" size="11" color="secondary" features="tnum"/>
+        <text if="!app.h{i}" value="{{str.All day}}" size="11" color="secondary"/>
+      </column>
+      <text value="{{app.e{i}}}" size="13" weight="500" ellipsis="true" grow="1"/>
+    </row>''' for i in range(3))
+pkg('events', 'Events', 'Productivity', (352, 170), f'''
+  <!-- Upcoming events of the iCalendar links in a text file the title opens in Notepad (for
+       example the secret address of a Google or Outlook calendar), every 30 minutes. -->
+  <column padding="14 18" gap="8" width="fill" height="fill">
+    <row width="fill" align="center" action="edit">
+      <text value="{{str.Events}}" size="14" weight="700" color="accent"/>
+    </row>
+    <text if="!app.linked" value="{{str.Click the title to add a calendar link}}" size="13" color="secondary" width="fill"/>
+    <text if="app.empty" value="{{str.No upcoming events}}" size="13" color="secondary" width="fill"/>
+{events}
+  </column>''', keys=['Click the title to add a calendar link', 'No upcoming events', 'All day'])
+
+dots = '\n'.join(f'''      <ellipse if="app.p{i}" width="6" height="6" fill="accent"/>
+      <ellipse if="!app.p{i}" width="6" height="6" fill="#8080805A"/>''' for i in range(3))
+stack_meters = '\n'.join(meter(k, lb, '      ') for k, lb in METERS[:2])
+pkg('smart-stack', 'Smart stack', 'Time', (170, 170), f'''
+  <!-- Clock, weather and system load in turns, every 15 seconds; a click shows the next. -->
+  <column padding="14 16 10 16" gap="4" width="fill" height="fill" action="page">
+    <column if="app.p0" grow="1" width="fill" justify="center" gap="2">
+      <text fit="true" value="{{clock.time}}" size="44" weight="700" features="tnum"/>
+      <text value="{{clock.date}}" size="13" color="secondary" ellipsis="true" width="fill"/>
+    </column>
+    <column if="app.p1" grow="1" width="fill" gap="2">
+      <text value="{{app.city}}" size="13" weight="600" ellipsis="true" width="fill"/>
+      <text if="app.temp" value="{{app.temp}}" size="38" weight="300" features="tnum"/>
+      <text if="!app.temp" value="{{str.Updating…}}" size="12" color="secondary"/>
+      <spacer grow="1"/>
+      <row gap="6" align="center">
+        <image if="app.icon" src="assets/{{app.icon}}.svg" width="22" height="22"/>
+        <text if="app.temp" value="↑{{app.hi}}  ↓{{app.lo}}" size="12" color="secondary" features="tnum"/>
+      </row>
+    </column>
+    <column if="app.p2" grow="1" width="fill" gap="7" justify="center">
+{stack_meters}
+    </column>
+    <row gap="5" justify="center" width="fill">
+{dots}
+    </row>
+  </column>''', keys=['Updating…'] + [lb for _, lb in METERS[:2]],
+    assets={**WEATHER, **{f'{k}.svg': bar(k) for k, _ in METERS[:2]}},
+    options=[('rotate', 'Rotate automatically', None, 'on', None)])
+
 import shutil
 for gone in ['clock-clear', 'clock-clear-stacked', 'clock-clear-weekday']:
     shutil.rmtree(os.path.join(ROOT, gone), ignore_errors=True)

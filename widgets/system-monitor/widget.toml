@@ -1,0 +1,85 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.system-monitor"
+name = "System monitor"
+category = "System"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font", "colors"]
+
+[strings.ru]
+"System monitor" = "Монитор системы"
+"Processor" = "Процессор"
+"Memory" = "Память"
+"Graphics" = "Графика"
+
+[strings.uk]
+"System monitor" = "Монітор системи"
+"Processor" = "Процесор"
+"Memory" = "Пам’ять"
+"Graphics" = "Графіка"
+
+[strings.de]
+"System monitor" = "Systemmonitor"
+"Processor" = "Prozessor"
+"Memory" = "Arbeitsspeicher"
+"Graphics" = "Grafik"
+
+[strings.fr]
+"System monitor" = "Moniteur système"
+"Processor" = "Processeur"
+"Memory" = "Mémoire"
+"Graphics" = "Graphisme"
+
+[strings.es]
+"System monitor" = "Monitor del sistema"
+"Processor" = "Procesador"
+"Memory" = "Memoria"
+"Graphics" = "Gráficos"
+
+[strings.it]
+"System monitor" = "Monitor di sistema"
+"Processor" = "Processore"
+"Memory" = "Memoria"
+"Graphics" = "Grafica"
+
+[strings.pt]
+"System monitor" = "Monitor do sistema"
+"Processor" = "Processador"
+"Memory" = "Memória"
+"Graphics" = "Gráficos"
+
+[strings.pl]
+"System monitor" = "Monitor systemu"
+"Processor" = "Procesor"
+"Memory" = "Pamięć"
+"Graphics" = "Grafika"
+
+[strings.zh]
+"System monitor" = "系统监视器"
+"Processor" = "处理器"
+"Memory" = "内存"
+"Graphics" = "图形"
+
+[strings.ja]
+"System monitor" = "システム モニター"
+"Processor" = "プロセッサ"
+"Memory" = "メモリ"
+"Graphics" = "グラフィックス"
+
+[strings.ko]
+"System monitor" = "시스템 모니터"
+"Processor" = "프로세서"
+"Memory" = "메모리"
+"Graphics" = "그래픽"

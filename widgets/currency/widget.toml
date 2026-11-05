@@ -1,0 +1,80 @@
+#:schema ../../schemas/widget.schema.json
+id = "dev.widget-engine.currency"
+name = "Exchange rates"
+category = "Productivity"
+engine = "^0.1"
+size = [170, 170]
+
+[card]
+radius = 26
+background = "frosted"
+border = false
+shadow = true
+
+[font]
+family = "Nunito"
+weight = 400
+
+[customize]
+allow = ["size", "background", "theme", "font", "colors"]
+
+[[option]]
+key = "base"
+label = "Base currency"
+values = [["USD", "USD"], ["EUR", "EUR"], ["GBP", "GBP"], ["JPY", "JPY"], ["CNY", "CNY"], ["CHF", "CHF"], ["PLN", "PLN"], ["CAD", "CAD"]]
+default = "USD"
+
+[strings.ru]
+"Exchange rates" = "Курсы валют"
+"Updating…" = "Обновление…"
+"Base currency" = "Базовая валюта"
+
+[strings.uk]
+"Exchange rates" = "Курси валют"
+"Updating…" = "Оновлення…"
+"Base currency" = "Базова валюта"
+
+[strings.de]
+"Exchange rates" = "Wechselkurse"
+"Updating…" = "Wird aktualisiert…"
+"Base currency" = "Basiswährung"
+
+[strings.fr]
+"Exchange rates" = "Taux de change"
+"Updating…" = "Mise à jour…"
+"Base currency" = "Devise de base"
+
+[strings.es]
+"Exchange rates" = "Tipos de cambio"
+"Updating…" = "Actualizando…"
+"Base currency" = "Moneda base"
+
+[strings.it]
+"Exchange rates" = "Tassi di cambio"
+"Updating…" = "Aggiornamento…"
+"Base currency" = "Valuta di base"
+
+[strings.pt]
+"Exchange rates" = "Câmbio"
+"Updating…" = "Atualizando…"
+"Base currency" = "Moeda base"
+
+[strings.pl]
+"Exchange rates" = "Kursy walut"
+"Updating…" = "Aktualizowanie…"
+"Base currency" = "Waluta bazowa"
+
+[strings.zh]
+"Exchange rates" = "汇率"
+"Updating…" = "正在更新…"
+"Base currency" = "基准货币"
+
+[strings.ja]
+"Exchange rates" = "為替レート"
+"Updating…" = "更新中…"
+"Base currency" = "基準通貨"
+
+[strings.ko]
+"Exchange rates" = "환율"
+"Updating…" = "업데이트 중…"
+"Base currency" = "기준 통화"

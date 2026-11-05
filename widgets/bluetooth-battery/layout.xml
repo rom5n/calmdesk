@@ -1,0 +1,29 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- Battery levels Bluetooth devices report (headphones, mice, keyboards), every minute. -->
+  <column padding="14 16 16 16" gap="7" width="fill" height="fill">
+    <text value="{str.Device battery}" size="13" weight="600" color="secondary" ellipsis="true" width="fill"/>
+    <spacer grow="1"/>
+    <text if="!app.n0" value="{str.No Bluetooth devices with a battery}" size="12" color="secondary" width="fill"/>
+    <column if="app.n0" gap="3" width="fill">
+      <row width="fill" gap="6">
+        <text value="{app.n0}" size="12" weight="500" ellipsis="true" grow="1"/>
+        <text value="{app.p0}%" size="12" weight="700" features="tnum"/>
+      </row>
+      <image src="assets/b0.svg" width="fill" height="6"/>
+    </column>
+    <column if="app.n1" gap="3" width="fill">
+      <row width="fill" gap="6">
+        <text value="{app.n1}" size="12" weight="500" ellipsis="true" grow="1"/>
+        <text value="{app.p1}%" size="12" weight="700" features="tnum"/>
+      </row>
+      <image src="assets/b1.svg" width="fill" height="6"/>
+    </column>
+    <column if="app.n2" gap="3" width="fill">
+      <row width="fill" gap="6">
+        <text value="{app.n2}" size="12" weight="500" ellipsis="true" grow="1"/>
+        <text value="{app.p2}%" size="12" weight="700" features="tnum"/>
+      </row>
+      <image src="assets/b2.svg" width="fill" height="6"/>
+    </column>
+  </column>
+</widget>

@@ -1,0 +1,35 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- Upcoming events of the iCalendar links in a text file the title opens in Notepad (for
+       example the secret address of a Google or Outlook calendar), every 30 minutes. -->
+  <column padding="14 18" gap="8" width="fill" height="fill">
+    <row width="fill" align="center" action="edit">
+      <text value="{str.Events}" size="14" weight="700" color="accent"/>
+    </row>
+    <text if="!app.linked" value="{str.Click the title to add a calendar link}" size="13" color="secondary" width="fill"/>
+    <text if="app.empty" value="{str.No upcoming events}" size="13" color="secondary" width="fill"/>
+    <row if="app.e0" gap="10" width="fill" align="center">
+      <column width="86">
+        <text value="{app.d0}" size="11" weight="600" color="accent" ellipsis="true" width="fill"/>
+        <text if="app.h0" value="{app.h0}" size="11" color="secondary" features="tnum"/>
+        <text if="!app.h0" value="{str.All day}" size="11" color="secondary"/>
+      </column>
+      <text value="{app.e0}" size="13" weight="500" ellipsis="true" grow="1"/>
+    </row>
+    <row if="app.e1" gap="10" width="fill" align="center">
+      <column width="86">
+        <text value="{app.d1}" size="11" weight="600" color="accent" ellipsis="true" width="fill"/>
+        <text if="app.h1" value="{app.h1}" size="11" color="secondary" features="tnum"/>
+        <text if="!app.h1" value="{str.All day}" size="11" color="secondary"/>
+      </column>
+      <text value="{app.e1}" size="13" weight="500" ellipsis="true" grow="1"/>
+    </row>
+    <row if="app.e2" gap="10" width="fill" align="center">
+      <column width="86">
+        <text value="{app.d2}" size="11" weight="600" color="accent" ellipsis="true" width="fill"/>
+        <text if="app.h2" value="{app.h2}" size="11" color="secondary" features="tnum"/>
+        <text if="!app.h2" value="{str.All day}" size="11" color="secondary"/>
+      </column>
+      <text value="{app.e2}" size="13" weight="500" ellipsis="true" grow="1"/>
+    </row>
+  </column>
+</widget>

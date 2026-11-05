@@ -1,0 +1,27 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- European Central Bank rates (frankfurter.dev) for one unit of the base currency, hourly. -->
+  <column padding="14 16 14 16" gap="5" width="fill" height="fill">
+    <row width="fill">
+      <text value="{str.Exchange rates}" size="13" weight="600" color="secondary" ellipsis="true" grow="1"/>
+      <text value="1 {app.base}" size="13" weight="700" color="accent"/>
+    </row>
+    <spacer grow="1"/>
+    <text if="!app.c0" value="{str.Updating…}" size="12" color="secondary"/>
+    <row if="app.c0" width="fill">
+      <text value="{app.c0}" size="13" weight="600" color="secondary" grow="1"/>
+      <text value="{app.r0}" size="13" weight="700" features="tnum"/>
+    </row>
+    <row if="app.c1" width="fill">
+      <text value="{app.c1}" size="13" weight="600" color="secondary" grow="1"/>
+      <text value="{app.r1}" size="13" weight="700" features="tnum"/>
+    </row>
+    <row if="app.c2" width="fill">
+      <text value="{app.c2}" size="13" weight="600" color="secondary" grow="1"/>
+      <text value="{app.r2}" size="13" weight="700" features="tnum"/>
+    </row>
+    <row if="app.c3" width="fill">
+      <text value="{app.c3}" size="13" weight="600" color="secondary" grow="1"/>
+      <text value="{app.r3}" size="13" weight="700" features="tnum"/>
+    </row>
+  </column>
+</widget>

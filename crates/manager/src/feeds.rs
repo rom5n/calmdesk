@@ -37,6 +37,15 @@ enum Kind {
     Weather,
     World,
     Usage,
+    /// Processor, memory and graphics load.
+    Monitor,
+    /// Battery levels of Bluetooth devices.
+    Devices,
+    Currency,
+    /// Event rows the layout has.
+    Events(usize),
+    /// Clock, weather and load in turns.
+    Stack,
 }
 
 fn kind(package_id: &str) -> Option<Kind> {
@@ -52,6 +61,11 @@ fn kind(package_id: &str) -> Option<Kind> {
         "weather" | "weather-square" => Kind::Weather,
         "clock-world" => Kind::World,
         "screen-time" | "screen-time-square" => Kind::Usage,
+        "system-monitor" => Kind::Monitor,
+        "bluetooth-battery" => Kind::Devices,
+        "currency" => Kind::Currency,
+        "events" => Kind::Events(3),
+        "smart-stack" => Kind::Stack,
         _ => return None,
     })
 }
@@ -111,7 +125,7 @@ pub fn action(id: &str, action: &str) -> bool {
     if crate::timers::action(id, action) {
         return true;
     }
-    let ours = matches!(action, "wifi" | "bluetooth" | "saver" | "airplane" | "edit") || action.starts_with("task:");
+    let ours = matches!(action, "wifi" | "bluetooth" | "saver" | "airplane" | "edit" | "page") || action.starts_with("task:");
     if ours {
         send(Msg::Action(id.into(), action.into()));
     }
@@ -173,6 +187,20 @@ pub fn sample(package_id: &str) -> Values {
             v
         }
         Some(Kind::World) => world_values(""),
+        Some(Kind::Monitor) => own(&[("cpu", "23"), ("cpu_t", "23%"), ("ram", "58"), ("ram_t", "58%"), ("gpu", "12"), ("gpu_t", "12%")]),
+        Some(Kind::Devices) => own(&[("n0", "Headphones"), ("p0", "80"), ("b0", "80"), ("n1", "Mouse"), ("p1", "45"), ("b1", "45"), ("n2", "Keyboard"), ("p2", "100"), ("b2", "100")]),
+        Some(Kind::Currency) => own(&[("base", "USD"), ("c0", "EUR"), ("r0", "0.8910"), ("c1", "GBP"), ("r1", "0.7430"), ("c2", "JPY"), ("r2", "158.46"), ("c3", "CNY"), ("r3", "6.67")]),
+        Some(Kind::Events(_)) => {
+            let at = |day: &str, h: &str, t: &str| crate::events::Event { start: format!("{day}{h}"), all_day: h == "0000", title: tr(t).into() };
+            let mut v = crate::events::values(&[
+                at("20261106", "0930", "Team stand-up"),
+                at("20261106", "1300", "Lunch with Anna"),
+                at("20261107", "0000", "Mom's birthday"),
+            ]);
+            v.push(("linked".into(), "on".into()));
+            v
+        }
+        Some(Kind::Stack) => own(&[("p0", "on")]),
         Some(Kind::Usage) => {
             let minutes = [0, 0, 0, 0, 0, 0, 0, 0, 12, 38, 52, 45, 20, 34, 58, 41, 30, 0, 0, 0, 0, 0, 0, 0];
             usage_values(&minutes.map(|m| m * 60_000))
@@ -212,10 +240,24 @@ struct Worker {
     /// last try failed (it is then the one saved on disk, or none).
     weather: HashMap<String, (Values, Instant, bool)>,
     usage: Option<Usage>,
+    load: crate::sensors::Load,
+    /// Bluetooth battery levels, and when they were read.
+    devices: Option<(Values, Instant)>,
+    /// Rates for each base currency, and when they were fetched.
+    rates: HashMap<String, (Values, Instant)>,
+    /// Each events widget's events, when fetched, and from which links.
+    events: HashMap<String, (Vec<crate::events::Event>, Instant, String)>,
+    /// Each smart stack's page, and since when.
+    pages: HashMap<String, (usize, Instant)>,
 }
 
 const PHOTO_EVERY: Duration = Duration::from_secs(15 * 60);
 const WEATHER_EVERY: Duration = Duration::from_secs(30 * 60);
+const DEVICES_EVERY: Duration = Duration::from_secs(60);
+const RATES_EVERY: Duration = Duration::from_secs(60 * 60);
+const EVENTS_EVERY: Duration = Duration::from_secs(30 * 60);
+const PAGE_EVERY: Duration = Duration::from_secs(15);
+const PAGES: usize = 3;
 
 impl Worker {
     fn handle(&mut self, m: Msg) {
@@ -234,11 +276,14 @@ impl Worker {
         self.widgets.retain(|(i, _)| i != id);
         self.sent.retain(|(i, _), _| i != id);
         self.shown.remove(id);
+        self.events.remove(id);
+        self.pages.remove(id);
     }
 
     fn refresh(&mut self) {
         self.count_usage();
         let mut system = None;
+        let mut load = None;
         let mut out = Vec::new();
         for (id, kind) in self.widgets.clone() {
             let values = match kind {
@@ -249,6 +294,16 @@ impl Worker {
                 Kind::Weather => self.weather(&id),
                 Kind::World => world_values(&id),
                 Kind::Usage => usage_values(&self.usage.as_ref().map_or([0; 24], |u| u.ms)),
+                Kind::Monitor => load.get_or_insert_with(|| self.load_values()).clone(),
+                Kind::Devices => self.devices(),
+                Kind::Currency => self.rates(&id),
+                Kind::Events(rows) => self.events(&id, rows),
+                Kind::Stack => {
+                    let mut v = self.page(&id);
+                    v.extend(self.weather(&id));
+                    v.extend(load.get_or_insert_with(|| self.load_values()).clone());
+                    v
+                }
             };
             for (k, v) in values {
                 let key = (id.clone(), k);
@@ -310,6 +365,98 @@ impl Worker {
         v
     }
 
+    fn load_values(&mut self) -> Values {
+        let (cpu, ram, gpu, _) = self.load.read();
+        let pct = |p: f32| format!("{}%", p.round() as u32);
+        let mut v = vec![
+            ("cpu".into(), format!("{cpu:.0}")),
+            ("cpu_t".into(), pct(cpu)),
+            ("ram".into(), format!("{ram:.0}")),
+            ("ram_t".into(), pct(ram)),
+        ];
+        // No counter (old drivers, virtual machines): the row hides.
+        v.push(("gpu".into(), gpu.map_or(String::new(), |g| format!("{g:.0}"))));
+        v.push(("gpu_t".into(), gpu.map_or(String::new(), pct)));
+        v
+    }
+
+    fn devices(&mut self) -> Values {
+        if self.devices.as_ref().is_none_or(|(_, t)| t.elapsed() > DEVICES_EVERY) {
+            let found = crate::sensors::bluetooth_batteries();
+            let mut v = Values::new();
+            for i in 0..3 {
+                let (name, level) = found.get(i).map_or((String::new(), String::new()), |(n, l)| (n.clone(), l.to_string()));
+                v.push((format!("n{i}"), name));
+                v.push((format!("p{i}"), level.clone()));
+                v.push((format!("b{i}"), level));
+            }
+            self.devices = Some((v, Instant::now()));
+        }
+        self.devices.as_ref().unwrap().0.clone()
+    }
+
+    /// Rates of the widget's base currency; the last ones while offline.
+    fn rates(&mut self, id: &str) -> Values {
+        let base = crate::option(id, "base").unwrap_or_else(|| "USD".into());
+        if self.rates.get(&base).is_none_or(|(_, t)| t.elapsed() > RATES_EVERY) {
+            let fresh = fetch_rates(&base);
+            let old = self.rates.remove(&base).map(|(v, _)| v).unwrap_or_default();
+            // Offline: try again in five minutes.
+            let at = if fresh.is_some() { Instant::now() } else { Instant::now().checked_sub(RATES_EVERY - Duration::from_secs(300)).unwrap_or_else(Instant::now) };
+            self.rates.insert(base.clone(), (fresh.unwrap_or(old), at));
+        }
+        let mut v = vec![("base".to_string(), base.clone())];
+        v.extend(self.rates[&base].0.clone());
+        v
+    }
+
+    /// The next events of the links in the widget's text file.
+    fn events(&mut self, id: &str, rows: usize) -> Values {
+        let links = std::fs::read_to_string(file(id, "events")).unwrap_or_default();
+        let stale = self.events.get(id).is_none_or(|(_, t, l)| *l != links || t.elapsed() > EVENTS_EVERY);
+        if stale {
+            let mut all = Vec::new();
+            let mut failed = false;
+            for url in links.lines().map(str::trim).filter(|l| l.contains("://")) {
+                let url = url.replacen("webcal://", "https://", 1);
+                match curl(&url) {
+                    Some(text) if text.contains("BEGIN:VCALENDAR") => all.extend(crate::events::parse(&text)),
+                    _ => failed = true,
+                }
+            }
+            // Offline: keep the events from before.
+            if failed && all.is_empty() {
+                if let Some((old, _, _)) = self.events.remove(id) {
+                    all = old;
+                }
+            }
+            self.events.insert(id.into(), (all, Instant::now(), links.clone()));
+        }
+        let t = unsafe { GetLocalTime() };
+        let now = format!("{:04}{:02}{:02}{:02}{:02}", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute);
+        let next = crate::events::upcoming(self.events[id].0.clone(), &now, rows);
+        let linked = links.contains("://");
+        let mut v = crate::events::values(&next);
+        // Rows that are empty now: cleared, not left from before.
+        for i in next.len()..rows {
+            v.push((format!("e{i}"), String::new()));
+        }
+        v.push(("linked".into(), on(linked)));
+        v.push(("empty".into(), on(linked && next.is_empty())));
+        v
+    }
+
+    /// The smart stack's page flags `p0`..: the next page every 15 seconds, unless turned off.
+    fn page(&mut self, id: &str) -> Values {
+        let rotate = crate::option(id, "rotate").as_deref() != Some("off");
+        let (page, since) = self.pages.entry(id.into()).or_insert((0, Instant::now()));
+        if rotate && since.elapsed() > PAGE_EVERY {
+            *page = (*page + 1) % PAGES;
+            *since = Instant::now();
+        }
+        (0..PAGES).map(|i| (format!("p{i}"), on(i == *page))).collect()
+    }
+
     /// Adds the time since the last call to this hour, if someone used the PC lately.
     fn count_usage(&mut self) {
         let now = unsafe { GetLocalTime() };
@@ -336,8 +483,17 @@ impl Worker {
             // No public API switches these: their Settings pages do.
             "saver" => open("ms-settings:batterysaver"),
             "airplane" => open("ms-settings:network-airplanemode"),
+            "page" => {
+                let (page, since) = self.pages.entry(id.into()).or_insert((0, Instant::now()));
+                *page = (*page + 1) % PAGES;
+                *since = Instant::now();
+            }
             "edit" => {
-                let dir = if self.widgets.iter().any(|(i, k)| i == id && matches!(k, Kind::Tasks(_))) { "tasks" } else { "notes" };
+                let dir = match self.widgets.iter().find(|(i, _)| i == id).map(|(_, k)| *k) {
+                    Some(Kind::Tasks(_)) => "tasks",
+                    Some(Kind::Events(_)) => "events",
+                    _ => "notes",
+                };
                 let path = file(id, dir);
                 if !path.exists() {
                     let _ = std::fs::create_dir_all(path.parent().unwrap());
@@ -681,6 +837,21 @@ pub(crate) fn curl(url: &str) -> Option<String> {
     const CREATE_NO_WINDOW: u32 = 0x0800_0000;
     let out = std::process::Command::new("curl.exe").args(["-s", "-m", "15", url]).creation_flags(CREATE_NO_WINDOW).output().ok()?;
     out.status.success().then(|| String::from_utf8_lossy(&out.stdout).into_owned())
+}
+
+/// One unit of `base` in the first four other currencies of the widget's list.
+fn fetch_rates(base: &str) -> Option<Values> {
+    const CODES: [&str; 8] = ["USD", "EUR", "GBP", "JPY", "CNY", "CHF", "PLN", "CAD"];
+    let to: Vec<&str> = CODES.iter().copied().filter(|c| *c != base).take(4).collect();
+    let json = curl(&format!("https://api.frankfurter.dev/v1/latest?base={base}&symbols={}", to.join(",")))?;
+    let rates = section(&json, "rates");
+    let mut v = Values::new();
+    for (i, code) in to.iter().enumerate() {
+        let r: f64 = field(rates, code)?.parse().ok()?;
+        v.push((format!("c{i}"), code.to_string()));
+        v.push((format!("r{i}"), if r >= 100.0 { format!("{r:.1}") } else if r >= 1.0 { format!("{r:.2}") } else { format!("{r:.4}") }));
+    }
+    Some(v)
 }
 
 /// Icon file name in the weather package for a WMO weather code.

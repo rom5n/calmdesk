@@ -1,0 +1,43 @@
+<widget xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schemas/layout.xsd">
+  <!-- Clock, weather and system load in turns, every 15 seconds; a click shows the next. -->
+  <column padding="14 16 10 16" gap="4" width="fill" height="fill" action="page">
+    <column if="app.p0" grow="1" width="fill" justify="center" gap="2">
+      <text fit="true" value="{clock.time}" size="44" weight="700" features="tnum"/>
+      <text value="{clock.date}" size="13" color="secondary" ellipsis="true" width="fill"/>
+    </column>
+    <column if="app.p1" grow="1" width="fill" gap="2">
+      <text value="{app.city}" size="13" weight="600" ellipsis="true" width="fill"/>
+      <text if="app.temp" value="{app.temp}" size="38" weight="300" features="tnum"/>
+      <text if="!app.temp" value="{str.Updating…}" size="12" color="secondary"/>
+      <spacer grow="1"/>
+      <row gap="6" align="center">
+        <image if="app.icon" src="assets/{app.icon}.svg" width="22" height="22"/>
+        <text if="app.temp" value="↑{app.hi}  ↓{app.lo}" size="12" color="secondary" features="tnum"/>
+      </row>
+    </column>
+    <column if="app.p2" grow="1" width="fill" gap="7" justify="center">
+      <column if="app.cpu_t" gap="3" width="fill">
+        <row width="fill">
+          <text value="{str.Processor}" size="12" weight="500" ellipsis="true" grow="1"/>
+          <text value="{app.cpu_t}" size="12" weight="700" features="tnum"/>
+        </row>
+        <image src="assets/cpu.svg" width="fill" height="6"/>
+      </column>
+      <column if="app.ram_t" gap="3" width="fill">
+        <row width="fill">
+          <text value="{str.Memory}" size="12" weight="500" ellipsis="true" grow="1"/>
+          <text value="{app.ram_t}" size="12" weight="700" features="tnum"/>
+        </row>
+        <image src="assets/ram.svg" width="fill" height="6"/>
+      </column>
+    </column>
+    <row gap="5" justify="center" width="fill">
+      <ellipse if="app.p0" width="6" height="6" fill="accent"/>
+      <ellipse if="!app.p0" width="6" height="6" fill="#8080805A"/>
+      <ellipse if="app.p1" width="6" height="6" fill="accent"/>
+      <ellipse if="!app.p1" width="6" height="6" fill="#8080805A"/>
+      <ellipse if="app.p2" width="6" height="6" fill="accent"/>
+      <ellipse if="!app.p2" width="6" height="6" fill="#8080805A"/>
+    </row>
+  </column>
+</widget>

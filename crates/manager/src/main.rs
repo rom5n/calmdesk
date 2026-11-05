@@ -8,11 +8,13 @@
 #![windows_subsystem = "windows"]
 
 mod catalog;
+mod events;
 mod feeds;
 mod gallery;
 mod log;
 mod shell;
 mod remote;
+mod sensors;
 mod timers;
 mod update;
 
