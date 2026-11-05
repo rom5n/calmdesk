@@ -1,8 +1,14 @@
 # Calmdesk
 
-The widget gallery and widget center for Windows 11. Calmdesk is not one more app to open:
-it is the one place where the desktop widgets of every app live, built-in and installed, and
-it is made to feel like a part of Windows itself.
+**Your desktop, beautifully alive. The widget center Windows 11 deserves.**
+
+Calmdesk brings gorgeous, glanceable widgets to the Windows desktop: the time across the
+world, your next meeting, the weather, your music, your battery, your notes. Everything you
+need at a glance, right on the wallpaper, in materials that look like they were made by
+Microsoft itself.
+
+**[Download Calmdesk for free](https://github.com/rom5n/calmdesk/releases/latest)**: one small
+installer, no admin rights, ready in seconds.
 
 ![Clocks, calendar, smart stack, timers](docs/images/time.png)
 
@@ -12,23 +18,61 @@ it is made to feel like a part of Windows itself.
 
 *Every built-in widget, in liquid glass with the light theme.*
 
-**Download:** the installer is on the [Releases](https://github.com/rom5n/calmdesk/releases) page.
+## Why you will love Calmdesk
 
-## A widget center, not an app
+### Stunning by design
 
-- **One gallery for all widgets.** Calmdesk lists every widget package on the PC: its own,
-  and the ones other apps install. Search it, drag a widget onto the desktop or click it to
-  add it. Apps ship widgets; Calmdesk shows them all the same way.
-- **Feels native.** It lives in the notification area, starts with Windows and brings back the
-  widgets that were on the desktop. Widgets sit below every window next to the desktop icons,
-  follow the light and dark mode, the accent color and the display language, use frosted and
-  liquid-glass materials, and hide while a fullscreen app runs on their monitor. There is no
-  main window to manage.
-- **One settings menu.** Right-click any widget for the same Edit menu: size, background,
-  theme, corners, font, colors and the widget's own options. A new widget starts with the style
-  last picked for that kind of widget.
-- **Light on the PC.** Rendered on the GPU by [widget-engine](https://github.com/rom5n/widget-engine),
-  about 0% CPU while idle.
+- **Liquid glass.** Widgets bend and refract your wallpaper through a real glass edge, with a
+  delicate rainbow rim. Prefer something calmer? Frosted, solid or fully clear, one click away.
+- **Feels native.** Light and dark mode, your accent color, your language and your monitor's
+  sharpness are followed automatically. Calmdesk looks like part of Windows, not an add-on.
+- **Fluid motion.** Smooth second hands, springy buttons and gentle fades on every widget.
+
+### Make it yours
+
+- **Every widget, your style.** Right-click any widget to change its size (Small to Huge),
+  material, transparency, blur, tint, corners, shadow, theme, font and colors.
+- **Smart defaults.** Style one clock the way you like, and the next clock you add starts
+  looking just like it.
+- **Place it anywhere.** Double-click and hold to move a widget; it snaps neatly to screen edges
+  and to other widgets.
+
+### All your widgets, in one place
+
+- **A beautiful gallery.** Browse every widget by category, search by name, then drag one onto
+  the desktop or simply click it.
+- **Open to every app.** Widgets from other apps appear in the same gallery, with the same
+  look and the same settings, so your desktop always feels like one design.
+- **Always there.** Calmdesk starts with Windows and brings your widgets back exactly where you
+  left them.
+
+### Out of your way
+
+- **No window to manage.** Calmdesk lives quietly in the notification area.
+- **Respects your games and movies.** Widgets step aside while a fullscreen app runs on their
+  monitor, and come back when you are done.
+- **Your data stays yours.** Notes and tasks are plain text files on your PC. No account, no
+  sign-in, no tracking.
+- **Back up in one click.** Export your whole desktop setup and import it on any PC.
+- **Always up to date.** Calmdesk lets you know when a new version is out.
+
+## 40+ widgets included
+
+| | |
+|---|---|
+| **Time** | Digital, bold and outline clocks, analog clocks in classic, modern and minimal styles, world clock, dual clock, calendar |
+| **Focus** | Timer, stopwatch, pomodoro |
+| **Productivity** | Notes and to-do lists, upcoming events from Google or Outlook calendars |
+| **Weather** | Current conditions and forecast for your city or any city in the world, available offline with the last forecast |
+| **Media** | Now Playing with artwork and controls for any music or video app |
+| **System** | Battery, system monitor (processor, memory, graphics), screen time, Bluetooth headphones and controller battery |
+| **Quick switches** | Wi-Fi, Bluetooth, energy saver, airplane mode |
+| **Photos** | Your favorite photo, or a folder that shows a new photo every 15 minutes |
+| **Finance** | Live exchange rates for USD, EUR, RUB, GBP, CNY, JPY, CHF, PLN and CAD |
+| **Smart stack** | Clock, weather and system load in one widget, taking turns |
+
+Available in 12 languages: English, Russian, Ukrainian, German, French, Spanish, Italian,
+Portuguese, Polish, Chinese, Japanese and Korean. 14 hand-picked fonts are included.
 
 ## For widget authors
 
@@ -50,29 +94,15 @@ with the same look and the same settings menu as every other widget.
 Details: [Getting into the Calmdesk gallery](https://github.com/rom5n/widget-engine/blob/main/docs/authoring.md#getting-into-the-calmdesk-gallery)
 and [Publishing a package](https://github.com/rom5n/widget-engine/blob/main/docs/authoring.md#publishing-a-package).
 
-## Built-in widgets
+## Settings and data
 
-Clocks (digital with and without a background, analog, both together, world clock),
-calendar, Now Playing, weather, battery, Wi-Fi / Bluetooth / energy saver / airplane mode
-switches, photos (a picked photo or folder, else the Pictures folder), notes and tasks (text
-files the widget opens in Notepad), screen time, timer, stopwatch and pomodoro, system
-monitor (processor, memory, graphics), Bluetooth device battery, exchange rates, calendar
-events (iCalendar links, such as a Google or Outlook calendar's secret address) and a smart
-stack (clock, weather and load in turns).
+The tray menu's Settings: start with Windows, hide widgets during fullscreen apps, language,
+export and import (through `Documents\Calmdesk backup`), the log folder
+(`%LOCALAPPDATA%\calmdesk\calmdesk.log`) and the update check (GitHub releases, once a day).
 
-Calmdesk feeds them (`crates/manager/src/feeds.rs`, `timers.rs`, `sensors.rs`, `events.rs`).
-Weather comes from Open-Meteo for the city of the PC's IP address (ipinfo.io), and the last
-forecast is shown offline. Rates come from Exchange Rate API (open.er-api.com).
-
-## Settings
-
-The tray menu's Settings: start with Windows, hide widgets during fullscreen apps (only on
-that app's monitor), language, export and import (through `Documents\Calmdesk backup`), the
-log folder (`%LOCALAPPDATA%\calmdesk\calmdesk.log`, crash reports next to it) and the update
-check (GitHub releases of this repository, once a day).
-
-Fonts in `fonts/` (Google Fonts, SIL Open Font License, licenses next to them) ship with
-Calmdesk; widgets can pick them like installed fonts.
+Weather comes from Open-Meteo, the city from the PC's IP address (ipinfo.io) unless you pick
+one. Exchange rates come from Exchange Rate API (open.er-api.com). The fonts in `fonts/` are
+Google Fonts under the SIL Open Font License, with their licenses next to them.
 
 ## Building
 
