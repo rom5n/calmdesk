@@ -10,11 +10,11 @@ Microsoft itself.
 **[Download Calmdesk for free](https://github.com/rom5n/calmdesk/releases/latest)**: one small
 installer, no admin rights, ready in seconds.
 
-![Clocks, calendar, smart stack, timers](docs/images/time.png)
-
 ![Battery, switches, screen time, system monitor, device battery](docs/images/system.png)
 
 ![Notes, tasks, photos, weather, events, Now Playing, exchange rates](docs/images/more.png)
+
+![Clocks, calendar, smart stack, timers](docs/images/time.png)
 
 *Every built-in widget, in liquid glass with the light theme.*
 
