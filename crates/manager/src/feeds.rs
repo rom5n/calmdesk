@@ -151,6 +151,7 @@ pub fn sample(package_id: &str) -> Values {
         Some(Kind::Weather) => {
             let mut v = own(&[
             ("city", tr("Paris")),
+            ("ready", "on"),
             ("temp", "18°"),
             ("icon", "partly"),
             ("k_partly", "on"),
@@ -207,8 +208,9 @@ struct Worker {
     photos: HashMap<PathBuf, (Vec<PathBuf>, Instant)>,
     /// Photo shown by each widget, and since when.
     shown: HashMap<String, (PathBuf, Instant)>,
-    /// Forecast of each city ("auto": the IP address's), and when it was fetched.
-    weather: HashMap<String, (Values, Instant)>,
+    /// Forecast of each city ("auto": the IP address's), when it was fetched, and whether the
+    /// last try failed (it is then the one saved on disk, or none).
+    weather: HashMap<String, (Values, Instant, bool)>,
     usage: Option<Usage>,
 }
 
@@ -284,21 +286,28 @@ impl Worker {
 
     fn weather(&mut self, id: &str) -> Values {
         let city = crate::option(id, "city").unwrap_or_else(|| "auto".into());
-        let due = self.weather.get(&city).is_none_or(|(_, t)| t.elapsed() > WEATHER_EVERY);
+        let due = self.weather.get(&city).is_none_or(|(_, t, _)| t.elapsed() > WEATHER_EVERY);
         if due {
             match fetch_weather(&city) {
                 Some(v) => {
-                    self.weather.insert(city.clone(), (v, Instant::now()));
+                    save_weather(&city, &v);
+                    self.weather.insert(city.clone(), (v, Instant::now(), false));
                 }
-                // Offline: try again in two minutes.
+                // Offline: the last forecast, from disk after a restart. Try again in two minutes.
                 None => {
-                    let old = self.weather.remove(&city).map(|(v, _)| v).unwrap_or_default();
+                    let old = self.weather.remove(&city).map(|(v, ..)| v).filter(|v| !v.is_empty()).unwrap_or_else(|| load_weather(&city));
                     let at = Instant::now().checked_sub(WEATHER_EVERY - Duration::from_secs(120)).unwrap_or_else(Instant::now);
-                    self.weather.insert(city.clone(), (old, at));
+                    self.weather.insert(city.clone(), (old, at, true));
                 }
             }
         }
-        self.weather[&city].0.clone()
+        let (v, _, offline) = &self.weather[&city];
+        let mut v = v.clone();
+        let some = !v.is_empty();
+        v.push(("ready".into(), on(true)));
+        v.push(("nonet".into(), on(!some && *offline)));
+        v.push(("stale".into(), on(some && *offline)));
+        v
     }
 
     /// Adds the time since the last call to this hour, if someone used the PC lately.
@@ -488,7 +497,7 @@ fn file(id: &str, dir: &str) -> PathBuf {
     crate::data_dir().join(dir).join(format!("{id}.txt"))
 }
 
-fn open(target: &str) {
+pub(crate) fn open(target: &str) {
     // explorer opens files with their default app and ms-settings: links in Settings.
     let _ = std::process::Command::new("explorer.exe").arg(target).spawn();
 }
@@ -650,7 +659,7 @@ fn toggle_task(text: &str, n: usize) -> String {
 
 /// The value after `"key":` in a JSON text: a string's content, an array's items, or a number.
 // ponytail: no JSON parser for two known replies; switch to serde_json if more appear.
-fn field<'a>(json: &'a str, key: &str) -> Option<&'a str> {
+pub(crate) fn field<'a>(json: &'a str, key: &str) -> Option<&'a str> {
     let pat = format!("\"{key}\":");
     let rest = json[json.find(&pat)? + pat.len()..].trim_start();
     if let Some(r) = rest.strip_prefix('"') {
@@ -667,7 +676,7 @@ fn section<'a>(json: &'a str, name: &str) -> &'a str {
     json.find(&format!("\"{name}\":{{")).map_or("", |i| &json[i..])
 }
 
-fn curl(url: &str) -> Option<String> {
+pub(crate) fn curl(url: &str) -> Option<String> {
     use std::os::windows::process::CommandExt;
     const CREATE_NO_WINDOW: u32 = 0x0800_0000;
     let out = std::process::Command::new("curl.exe").args(["-s", "-m", "15", url]).creation_flags(CREATE_NO_WINDOW).output().ok()?;
@@ -768,6 +777,23 @@ fn fetch_weather(city: &str) -> Option<Values> {
          &daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5{unit}"
     ))?;
     weather_values(&name, &json)
+}
+
+/// The last forecast of `city`, kept for when the PC is offline: `key<TAB>value` lines.
+fn weather_file(city: &str) -> PathBuf {
+    let name: String = city.chars().map(|c| if c.is_alphanumeric() { c } else { '-' }).collect();
+    crate::data_dir().join("weather").join(format!("{name}.txt"))
+}
+
+fn save_weather(city: &str, v: &Values) {
+    let path = weather_file(city);
+    let _ = std::fs::create_dir_all(path.parent().unwrap());
+    let _ = std::fs::write(path, v.iter().map(|(k, x)| format!("{k}\t{x}\n")).collect::<String>());
+}
+
+fn load_weather(city: &str) -> Values {
+    let text = std::fs::read_to_string(weather_file(city)).unwrap_or_default();
+    text.lines().filter_map(|l| l.split_once('\t')).map(|(k, v)| (k.into(), v.into())).collect()
 }
 
 fn weather_values(city: &str, json: &str) -> Option<Values> {

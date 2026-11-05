@@ -2,7 +2,8 @@
   <column padding="14 16 14 16" width="fill" height="fill">
     <text value="{app.city}" size="14" weight="600" ellipsis="true" width="fill"/>
     <text if="app.temp" value="{app.temp}" size="42" weight="300" features="tnum"/>
-    <text if="!app.temp" value="{str.Updating…}" size="13" color="secondary"/>
+    <text if="!app.ready" value="{str.Updating…}" size="13" color="secondary"/>
+    <text if="app.nonet" value="{str.No connection}" size="13" color="secondary"/>
     <spacer grow="1"/>
     <image if="app.icon" src="assets/{app.icon}.svg" width="26" height="26"/>
         <text if="app.k_clear" value="{str.Clear}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
@@ -12,6 +13,9 @@
         <text if="app.k_rain" value="{str.Rain}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
         <text if="app.k_snow" value="{str.Snow}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
         <text if="app.k_storm" value="{str.Thunderstorm}" size="12" weight="500" ellipsis="true" text-align="start" width="fill"/>
-    <text if="app.temp" value="↑{app.hi}  ↓{app.lo}" size="12" color="secondary" features="tnum"/>
+    <row if="app.temp" gap="4">
+      <text value="↑{app.hi}  ↓{app.lo}" size="12" color="secondary" features="tnum"/>
+      <text if="app.stale" value="· {str.Offline}" size="12" color="secondary"/>
+    </row>
   </column>
 </widget>

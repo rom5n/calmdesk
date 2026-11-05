@@ -291,29 +291,35 @@ pkg('weather', 'Weather', 'Weather', (352, 170), f'''
       <column grow="1">
         <text value="{{app.city}}" size="15" weight="600" ellipsis="true" width="fill"/>
         <text if="app.temp" value="{{app.temp}}" size="40" weight="300" features="tnum"/>
-        <text if="!app.temp" value="{{str.Updating…}}" size="13" color="secondary"/>
+        <text if="!app.ready" value="{{str.Updating…}}" size="13" color="secondary"/>
+        <text if="app.nonet" value="{{str.No connection}}" size="13" color="secondary"/>
       </column>
       <column width="150" align="end" gap="2">
         <image if="app.icon" src="assets/{{app.icon}}.svg" width="28" height="28"/>
 {cond_texts}
         <text if="app.temp" value="↑{{app.hi}}  ↓{{app.lo}}" size="12" color="secondary" features="tnum"/>
+        <text if="app.stale" value="{{str.Offline}}" size="11" color="secondary"/>
       </column>
     </row>
     <spacer grow="1"/>
     <row if="app.temp" width="fill" justify="space-between">
 {days}
     </row>
-  </column>''', variant='Wide', keys=['Updating…'] + [label for _, label in CONDS], assets=WEATHER, options=WEATHER_OPTIONS)
+  </column>''', variant='Wide', keys=['Updating…', 'No connection', 'Offline'] + [label for _, label in CONDS], assets=WEATHER, options=WEATHER_OPTIONS)
 pkg('weather-square', 'Weather', 'Weather', (170, 170), f'''
   <column padding="14 16 14 16" width="fill" height="fill">
     <text value="{{app.city}}" size="14" weight="600" ellipsis="true" width="fill"/>
     <text if="app.temp" value="{{app.temp}}" size="42" weight="300" features="tnum"/>
-    <text if="!app.temp" value="{{str.Updating…}}" size="13" color="secondary"/>
+    <text if="!app.ready" value="{{str.Updating…}}" size="13" color="secondary"/>
+    <text if="app.nonet" value="{{str.No connection}}" size="13" color="secondary"/>
     <spacer grow="1"/>
     <image if="app.icon" src="assets/{{app.icon}}.svg" width="26" height="26"/>
 {conds(12, "start")}
-    <text if="app.temp" value="↑{{app.hi}}  ↓{{app.lo}}" size="12" color="secondary" features="tnum"/>
-  </column>''', variant='Square', keys=['Updating…'] + [label for _, label in CONDS], assets=WEATHER, options=WEATHER_OPTIONS)
+    <row if="app.temp" gap="4">
+      <text value="↑{{app.hi}}  ↓{{app.lo}}" size="12" color="secondary" features="tnum"/>
+      <text if="app.stale" value="· {{str.Offline}}" size="12" color="secondary"/>
+    </row>
+  </column>''', variant='Square', keys=['Updating…', 'No connection', 'Offline'] + [label for _, label in CONDS], assets=WEATHER, options=WEATHER_OPTIONS)
 
 # --- clocks ----------------------------------------------------------------------------------
 DISPLAY = ('Nunito', 400)

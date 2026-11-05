@@ -6,7 +6,8 @@
       <column grow="1">
         <text value="{app.city}" size="15" weight="600" ellipsis="true" width="fill"/>
         <text if="app.temp" value="{app.temp}" size="40" weight="300" features="tnum"/>
-        <text if="!app.temp" value="{str.Updating…}" size="13" color="secondary"/>
+        <text if="!app.ready" value="{str.Updating…}" size="13" color="secondary"/>
+        <text if="app.nonet" value="{str.No connection}" size="13" color="secondary"/>
       </column>
       <column width="150" align="end" gap="2">
         <image if="app.icon" src="assets/{app.icon}.svg" width="28" height="28"/>
@@ -18,6 +19,7 @@
         <text if="app.k_snow" value="{str.Snow}" size="13" weight="500" ellipsis="true" text-align="end" width="fill"/>
         <text if="app.k_storm" value="{str.Thunderstorm}" size="13" weight="500" ellipsis="true" text-align="end" width="fill"/>
         <text if="app.temp" value="↑{app.hi}  ↓{app.lo}" size="12" color="secondary" features="tnum"/>
+        <text if="app.stale" value="{str.Offline}" size="11" color="secondary"/>
       </column>
     </row>
     <spacer grow="1"/>
