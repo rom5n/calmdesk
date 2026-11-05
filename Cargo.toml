@@ -4,7 +4,7 @@ members = ["crates/manager", "crates/installer", "crates/media"]
 
 [workspace.package]
 edition = "2024"
-license = "MIT OR Apache-2.0"
+license = "MIT"
 
 [profile.release]
 lto = true

@@ -88,4 +88,4 @@ git clone https://github.com/rom5n/calmdesk calmdesk
 
 ## License
 
-MIT ([LICENSE-MIT](LICENSE-MIT)) or Apache-2.0 ([LICENSE-APACHE](LICENSE-APACHE)), at your option.
+MIT, see [LICENSE](LICENSE).
