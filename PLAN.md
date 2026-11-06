@@ -100,71 +100,59 @@ A `.cdwidget` is a zip of the package folder.
 Done when: double-clicking a `.cdwidget` from Downloads installs it and shows it in the
 gallery, on a PC where Calmdesk was not running.
 
-### 7. Author credit and stats
+### 7. Author credit and stats (done)
 
-Builds on the `author`/`homepage` fields from item 1.
+- **Gallery:** store tiles show "Author · ↓downloads"; other apps' tiles show `author` when the
+  package sets it. The Community list is sorted by downloads.
+- **Stats:** download counts of the release assets, summed per id by the index CI (daily
+  schedule) into the 8th column of `index.txt`. They count preview downloads too. No telemetry
+  from Calmdesk itself.
+- **Author page:** the index CI writes `authors/<name>.md` (widgets, versions, downloads,
+  total) and commits it.
 
-- **Gallery:** every tile shows "by Name"; the tile's right-click (or an info button) opens
-  `homepage` and an optional `sponsor` link (new optional `widget.toml` field).
-- **Stats:** install count from GitHub release asset `download_count`, summed by the index CI
-  into `index.json` (`installs`). Shown on store tiles; sorts the Community list
-  ("Popular", "New"). No telemetry from Calmdesk itself.
-- **Author page:** index CI also writes `authors/<name>.md` on the index repo with the
-  author's packages and totals, so authors have a link to share.
-
-Done when: tiles show the author and install count, and an author can see their totals
-without asking anyone.
+Not done: opening `homepage` from a tile, a `sponsor` field, a "New" sort.
 
 ## Phase 2: bring users back
 
-### 6. Desktop profiles
+### 6. Desktop profiles (done: manual switching)
 
-- **Data:** a profile is a folder `data_dir()\profiles\<name>\` with `instances.txt` and
-  `widgets.ini`, the same files Export writes. Reuse `copy_data` and the export/import
-  restart flow in `main.rs`.
-- **Tray:** "Profiles" submenu: the list, "Save current as...", "Delete". Switching saves the
-  current state into its profile first.
-- **Automatic switching (later step):** rules in `settings.ini`: by time of day, by monitor
-  count, by Windows focus/game mode. Checked on the existing minute tick.
-- **Sharing:** "Share profile" writes a `.cdprofile` zip (profile files plus the ids of the
-  packages it uses). Opening one imports it as a new profile and offers to install missing
-  packages from the store.
+- **Data:** `data_dir()\profiles\<name>\` holds `instances.txt` and `widgets.ini`. Notes,
+  tasks and settings stay shared. Backups (Export) leave out profiles and store downloads.
+- **Tray:** "Profiles" submenu: the profiles (current one checked), "Save as new profile"
+  (named "Profile N"), "Open profiles folder" (rename or delete a profile there). Switching
+  restarts Calmdesk with `--profile <name>`: the current desktop is saved into its profile
+  first, then the other one is copied in.
 
-Done when: a user can keep "Work" and "Gaming" layouts and switch in one click without losing
-positions or settings, and a shared profile works on another PC.
+Not done: automatic switching rules (time of day, monitors, game mode) and `.cdprofile`
+sharing.
 
-### 8. Featured shelf
+### 8. Featured shelf (done)
 
-- **Index repo:** `featured.json`: a few entries with `title`, `package ids`, an optional
-  banner image, `from`/`to` dates. Edited by hand, no Calmdesk release needed.
-- **Gallery:** the first category becomes "Featured" when the index has an active shelf:
-  "Widget of the week" and seasonal packs (New Year countdown, exam season).
-- **What's new:** after an app update, the gallery opens once with a "What's new" card (text
-  from the release notes, fetched by `update.rs` along with the tag).
+- **Index repo:** `featured.txt`, edited by hand: title, first day, last day, package ids,
+  tab-separated. CI checks the dates and ids and publishes it with the index.
+- **Gallery:** a "Featured" group at the top of the sidebar, one row per shelf showing today,
+  with the installed or store version of each widget.
+- **What's new:** after an update, the tray menu has "What's new in X" until it is opened; it
+  opens the release notes on GitHub.
 
-Done when: changing `featured.json` changes the gallery for every user within a day.
+Not done: banner images; a "What's new" card in the gallery.
 
 ## Phase 3: more authors
 
-### 3. Remix any widget
+### 3. Remix any widget (done)
 
-- **Gallery:** right-click a tile, "Remix". Copies the package to
-  `%LOCALAPPDATA%\Widgets\<name>-remix`, rewrites `id` to `local.<user>.<name>` and `name` to
-  "<name> (remix)", then opens the folder's `layout.xml` in the default editor.
-- **Live reload in Calmdesk:** the manager watches `%LOCALAPPDATA%\Widgets` with
-  `ReadDirectoryChangesW` and reloads placed instances of a changed package, so a remix
-  updates on the desktop as it is saved. Errors show as a small toast with file and line
-  (same message `widget-dev` prints), the last good version stays.
-- Built-in widgets that need a feed keep it: remixes of `weather`, `media` and the rest are
-  fed by their original package's feed, keyed by the original id (store it as `remix_of` in
-  the copied `widget.toml`).
+- **Gallery:** right-click a tile, "Remix" (panels now get `Event::RightClick` from the
+  engine). Copies the package to `%LOCALAPPDATA%\Widgets\<folder>-remix`, sets `id` to the
+  original id plus `.remix` (`.remix2`, ...) and adds " (remix)" to `name`, then opens
+  `layout.xml` in Notepad and the folder in Explorer.
+- **Live reload:** the engine already reloads placed widgets when their package changes; a
+  broken edit keeps the last good version (the error goes to the log).
+- **Feeds:** `remix::original` strips the `.remix` suffix, so weather, media and the other
+  feeds treat a remix like its original. No `remix_of` field needed.
 
-Done when: a user who never installed Rust can change the look of the weather widget and see
-it update on the desktop on every save.
+Not done: an error toast with file and line.
 
-### 4. Data sources without code
-
-New bindings that the manager feeds, declared in `widget.toml`:
+### 4. Data sources without code (done)
 
 ```toml
 [[source]]
@@ -174,46 +162,34 @@ json = "data.amount"
 every = "5m"
 ```
 
-`{src.btc}` in the layout. Kinds:
+`{src.btc}` in the layout. Kinds: `url` (first line), `url` + `json` path (dotted, `[n]` for
+arrays), `url` + `rss = true` (`{src.news.1.title}`, `.link`, first 10 items, RSS or Atom),
+`file` (first line or `json` path, read every 15 s). `url` may use `{opt.<key>}`.
 
-- `url` + `json` path (dotted, with `[n]` for arrays);
-- `url` + `rss = true` (`{src.news.1.title}` ... for the first items);
-- `file` (a local text file, first line or `json` path), reloaded on change;
-- `command` (output of a local command), **only** for packages in `%LOCALAPPDATA%\Widgets`
-  that the user installed by hand, never for store or `.cdwidget` installs, and only after
-  the user allows it once per package. A command is code; the store stays code-free.
+- **Engine:** `[[source]]` in the manifest and schema (`PackageInfo::sources`), `src.*` host
+  values readable as `{src.*}`.
+- **Calmdesk:** `sources.rs`, one worker thread, minimum interval one minute, one fetch per
+  address per round, last values in `data_dir()\sources.txt` for start and offline.
+  Uses `serde_json`.
+- **Examples:** `engine/examples/sources`: Bitcoin price, GitHub stars, Hacker News. All three
+  checked live.
 
-Implementation: `crates/manager/src/sources.rs`, one worker thread like `feeds.rs`, minimum
-interval one minute, shared fetch for the same URL, values sent with the existing
-`widgine::set`. Last values cached so widgets show data at start and offline. Options
-can feed sources (`url = "https://.../{opt.symbol}"`).
-
-Engine: allow `[[source]]` in the schema and `{src.*}` as a binding namespace (parsed by the
-engine, values supplied by the host).
-
-Done when: a crypto price, a GitHub star count and a news feed widget can each be written with
-only `widget.toml` and `layout.xml`, and the store accepts them.
-
-Risks: users' IPs hitting arbitrary URLs is expected behavior, but list the URLs a store
-package uses on its tile so users see where it connects.
+Not done: the `command` kind (code; the store stays code-free), listing a store package's URLs
+on its tile.
 
 ## Phase 4: discovery
 
-### 9. winget
+### 9. winget (done, first submission by hand)
 
-- **Installer:** add a `--silent` switch (no window, no launch prompt) if it doesn't have one
-  yet. Each version needs a stable download URL (the release asset).
-- **winget:** open a manifest PR to `microsoft/winget-pkgs` for each release. Automate it with
-  `wingetcreate update` in the release workflow.
-- **Release workflow:** one GitHub Actions job that builds, uploads the release asset and
-  updates winget.
-- **Not planned:** a Microsoft Store listing. It needs a code-signing certificate, which we
-  don't have. Revisit if one is bought later.
-- **Without signing:** SmartScreen warns on first run of the unsigned installer. The README
-  should say so and show "More info", then "Run anyway".
-
-Done when: `winget install Calmdesk` installs the latest release, and each release updates
-winget without manual steps.
+- **Installer:** `--silent` (or `/S`) installs without a window and exits with 0 or 1.
+- **Release workflow:** `.github/workflows/release.yml`. Publishing a release on GitHub builds
+  the installer and attaches it as `Calmdesk-Setup.exe`.
+- **winget:** the first version must be submitted by hand (`wingetcreate new` with the release
+  URL, installer type `exe`, silent switch `--silent`). After that, with a `WINGET_TOKEN`
+  secret (a token that may open PRs on `microsoft/winget-pkgs`), the workflow runs
+  `wingetcreate update rom5n.Calmdesk` for each release.
+- **Not planned:** a Microsoft Store listing. It needs a code-signing certificate.
+- **Without signing:** the README tells users about SmartScreen ("More info", "Run anyway").
 
 ## Order and size
 

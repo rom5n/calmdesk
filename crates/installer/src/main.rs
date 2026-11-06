@@ -343,6 +343,14 @@ impl Widget for Setup {
 }
 
 fn main() -> Result<()> {
+    // `--silent` (winget, scripts): install with no window and exit; the exit code says how it went.
+    if std::env::args().any(|a| a == "--silent" || a == "/S") {
+        if let Err(e) = install() {
+            eprintln!("calmdesk-setup: {e}");
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
     let engine = widgine::Engine::new();
     // Middle of the primary monitor.
     let (w, h) = unsafe {

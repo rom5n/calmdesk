@@ -17,6 +17,9 @@ Microsoft itself.
 **[Download Calmdesk for free](https://github.com/rom5n/calmdesk/releases/latest)**: one small
 installer, no admin rights, ready in seconds.
 
+The installer is not code-signed yet, so Windows SmartScreen may warn the first time: choose
+**More info**, then **Run anyway**.
+
 ![Battery, switches, screen time, system monitor, device battery](docs/images/system.png)
 
 ![Notes, tasks, photos, weather, events, Now Playing, exchange rates](docs/images/more.png)
@@ -48,6 +51,11 @@ installer, no admin rights, ready in seconds.
 
 - **A beautiful gallery.** Browse every widget by category, search by name, then drag one onto
   the desktop or simply click it.
+- **Community widgets.** Widgets made by other people, one click to install, with a Featured
+  shelf of hand-picked ones. Double-click a `.cdwidget` file to install it too.
+- **Remix any widget.** Right-click a widget in the gallery, choose Remix, and change its look
+  in Notepad: it updates on the desktop as you save.
+- **Profiles.** Keep a Work and a Gaming desktop and switch between them from the tray.
 - **Open to every app.** Widgets from other apps appear in the same gallery, with the same
   look and the same settings, so your desktop always feels like one design.
 - **Always there.** Calmdesk starts with Windows and brings your widgets back exactly where you
@@ -94,7 +102,13 @@ with the same look and the same settings menu as every other widget.
    in with the built-in widgets.
 3. Feed live values from your app with `widgine::host` (Rust) or `we_host_set` (C);
    Calmdesk shows the widget in its own process and passes clicks back to your app.
-4. Share it as a `.cdwidget` file (`widget-dev pack <package-dir>`): users double-click it
+4. Show live data without code: `[[source]]` in `widget.toml` fetches a JSON value, an RSS
+   feed or a file for `{src.<key>}` (see the engine's
+   [data sources](https://github.com/rom5n/widgine/blob/main/docs/authoring.md#data-sources)).
+5. Put it in the store: open a pull request on
+   [calmdesk-widgets](https://github.com/rom5n/calmdesk-widgets). Merged widgets show up in
+   every gallery's Community section.
+6. Or share it as a `.cdwidget` file (`widget-dev pack <package-dir>`): users double-click it
    and Calmdesk installs it. Or install it from your app to `%LOCALAPPDATA%\Widgets\<package>`
    or `%ProgramData%\Widgets\<package>`, or register its folder under
    `HKCU\Software\Widgine\Packages`. Calmdesk finds it the next time the gallery opens.
@@ -144,7 +158,7 @@ cargo build --release -p calmdesk
 cargo build --release -p calmdesk-setup
 ```
 
-`target/release/calmdesk-setup.exe` is the installer: one exe with Calmdesk and the built-in
+`target/release/calmdesk-setup.exe` is the installer (`--silent` installs without a window): one exe with Calmdesk and the built-in
 widgets inside. It installs for the current user (no admin rights) to
 `%LOCALAPPDATA%\Programs\Calmdesk`, adds a Start menu shortcut and an Apps & features entry,
 and turns on the start with Windows. Uninstall from Apps & features. Build `calmdesk` first:

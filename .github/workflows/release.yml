@@ -1,0 +1,48 @@
+name: Release
+
+# Publish a release on GitHub (tag vX.Y.Z, notes written by hand): this builds the installer,
+# attaches it as Calmdesk-Setup.exe, and, once the WINGET_TOKEN secret exists, sends the new
+# version to winget.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: calmdesk
+      - uses: actions/checkout@v4
+        with:
+          repository: rom5n/widgine
+          path: engine
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release -p calmdesk
+        working-directory: calmdesk
+      - run: cargo build --release -p calmdesk-setup
+        working-directory: calmdesk
+      - name: Attach the installer
+        shell: bash
+        working-directory: calmdesk
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp target/release/calmdesk-setup.exe Calmdesk-Setup.exe
+          gh release upload "${{ github.event.release.tag_name }}" Calmdesk-Setup.exe --clobber
+      # The first winget version is submitted by hand (wingetcreate new); this updates it after.
+      # WINGET_TOKEN: a GitHub token that may open pull requests on microsoft/winget-pkgs.
+      - name: Update winget
+        if: ${{ env.WINGET_TOKEN != '' }}
+        shell: pwsh
+        run: |
+          $tag = "${{ github.event.release.tag_name }}"
+          $url = "https://github.com/rom5n/calmdesk/releases/download/$tag/Calmdesk-Setup.exe"
+          Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          .\wingetcreate.exe update rom5n.Calmdesk --version $tag.TrimStart('v') --urls $url --submit --token $env:WINGET_TOKEN
