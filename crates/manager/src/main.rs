@@ -14,6 +14,7 @@ mod feeds;
 mod gallery;
 mod install;
 mod remix;
+mod sources;
 mod store;
 mod log;
 mod shell;
@@ -333,6 +334,7 @@ fn add(entry: &Entry, drag: bool) {
         feed_media(&id);
     }
     feeds::add(&id, &entry.info.id);
+    sources::add(&id, &entry.info);
     remote::add(&id, &entry.info.id, &entry.dir);
     INSTANCES.with_borrow_mut(|v| v.push((id, entry.dir.clone())));
     save_instances();
@@ -456,6 +458,7 @@ fn request(r: shell::Request) {
                     widgine::close(&id);
                     media::remove(&id);
                     feeds::remove(&id);
+                    sources::remove(&id);
                     remote::remove(&id);
                 }
                 save_instances();
@@ -536,6 +539,7 @@ fn on_action(id: &str, action: &str) {
         INSTANCES.with_borrow_mut(|v| v.retain(|(i, _)| i != id));
         media::remove(id);
         feeds::remove(id);
+        sources::remove(id);
         remote::remove(id);
         save_instances();
         return;
@@ -614,6 +618,7 @@ fn main() -> windows::core::Result<()> {
                 }
                 if let Ok(info) = widgine::package_info(&dir) {
                     feeds::add(&id, &info.id);
+                    sources::add(&id, &info);
                     remote::add(&id, &info.id, &dir);
                 }
                 restored.push((id, dir));

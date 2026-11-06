@@ -91,6 +91,11 @@ fn send(m: Msg) {
     let _ = TX.get().unwrap().lock().unwrap().send(m);
 }
 
+/// From any thread: `value` for `key` of widget `id`, handed over on the UI thread.
+pub(crate) fn publish(id: &str, key: &str, value: &str) {
+    OUT.lock().unwrap().push((id.into(), key.into(), value.into()));
+}
+
 /// UI thread: hands the new values to the widgets.
 extern "system" fn tick(_: HWND, _: u32, _: usize, _: u32) {
     for (id, k, v) in std::mem::take(&mut *OUT.lock().unwrap()) {

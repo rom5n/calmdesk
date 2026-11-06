@@ -9,6 +9,7 @@ description = "Calmdesk: tray app with a widget gallery; hosts widgets and resto
 [dependencies]
 widgine = "0.1"
 media = { path = "../media" }
+serde_json = "1"
 
 [dependencies.windows]
 version = "0.62"

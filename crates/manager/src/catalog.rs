@@ -144,6 +144,7 @@ pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<crate::stor
                 version: item.version.clone(),
                 homepage: String::new(),
                 icon: None,
+                sources: Vec::new(),
             },
         };
         let source = match all.iter().find(|e| e.info.id == info.id) {
