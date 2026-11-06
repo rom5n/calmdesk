@@ -53,21 +53,22 @@ and nothing clipped in light and dark mode.
 
 ## Phase 1: reach users
 
-### 1. Widget store in the gallery (done in code; index repo not on GitHub yet)
+### 1. Widget store in the gallery (done)
 
 A "Community" group in the gallery, listing packages from a public index.
 
-- **Index:** repo `rom5n/calmdesk-widgets` (prepared in `../calmdesk-widgets`, not yet created
-  on GitHub). Authors add `packages/<id>/` with a PR. CI (`tools/build.py`) runs
+- **Index:** repo `rom5n/calmdesk-widgets`. Authors add `packages/<id>/` with a PR. CI (`tools/build.py`) runs
   `widget-dev --check`, requires `author`, `version` and a square icon (SVG, or PNG of at least
   64×64 px), rejects reserved `dev.widget-engine.` ids and a folder not named after the id,
   then packs every package and uploads `<id>-<version>.cdwidget` and `index.txt` to the
-  `packages` release. `index.txt`: one line per package, `id<TAB>sha256<TAB>url`. Plain text
-  instead of JSON: no parser needed, and names, categories and versions come from the package.
+  `packages` release. `index.txt`: a `#` comment line, then one line per package with
+  tab-separated id, sha256, url, version, author, category and name. Plain text instead of
+  JSON: no parser needed.
 - **Manager:** `store.rs`. Fetches `index.txt` at most once a day (release download URL, no API
-  rate limit), downloads new packages with curl (20 MB cap), checks `sha256` with certutil, and
-  unpacks each into `data_dir()\store\packages\<sha256>`. Previews are live widgets from those
-  folders, so no preview images. Packages that leave the index are deleted. Offline: the cache.
+  rate limit). The gallery lists every package from the index alone; a package is downloaded
+  only when its tile is shown or picked (curl, 20 MB cap, `sha256` checked with certutil) and
+  unpacked into `data_dir()\store\packages\<sha256>` for a live preview. Downloads that left
+  the index or are older than 30 days are deleted. Offline: the cached index.
 - **Gallery:** the sidebar groups categories under "Built-in", "Other apps" and "Community"
   captions (no captions while all widgets are built-in). A store tile shows the author. Clicking
   or dragging it installs it through `install.rs`, then adds it like any widget.

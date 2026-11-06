@@ -142,8 +142,8 @@ mod tests {
 
     /// A zip made by tar.exe, the way `widget-dev pack` makes them.
     fn pack(dir: &Path, out: &Path) {
-        let ok = std::process::Command::new("tar.exe").args(["--format", "zip", "-cf"]).arg(out).arg("-C").arg(dir).arg(".").status().unwrap().success();
-        assert!(ok);
+        let o = std::process::Command::new("tar.exe").args(["--format", "zip", "-cf"]).arg(out).arg("-C").arg(dir).arg(".").output().unwrap();
+        assert!(o.status.success(), "tar: {}", String::from_utf8_lossy(&o.stderr));
     }
 
     #[test]

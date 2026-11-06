@@ -342,6 +342,11 @@ impl Widget for Gallery {
                 for (c, &i) in ids.iter().enumerate() {
                     let x = CONTENT_X + c as f32 * (tw + GAP);
                     self.hits.push((rect(x, y, x + tw, y + TILE_H), Hit::Tile(i)));
+                    // A store widget not downloaded yet: fetch it, the gallery rebuilds once it is here.
+                    if let Some(item) = entries[i].store.as_ref().filter(|_| !entries[i].dir.is_dir()) {
+                        crate::store::fetch(item, crate::post_scanned);
+                        continue;
+                    }
                     let id = &entries[i].info.id;
                     let sample = crate::feeds::sample(id);
                     let sample: Vec<(&str, &str)> = sample.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();

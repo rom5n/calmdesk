@@ -25,8 +25,9 @@ pub struct Entry {
     /// Under the name on its tile: "Built-in", the app's folder name, or a store widget's author.
     pub source: String,
     pub kind: Kind,
-    /// Store widgets: the .cdwidget to install when the user picks it.
-    pub store: Option<PathBuf>,
+    /// Store widgets: the index line, to download and install it when the user picks it.
+    /// `dir` has no package until it is downloaded.
+    pub store: Option<crate::store::Item>,
 }
 
 /// The gallery groups widgets by where they come from, in this order.
@@ -105,9 +106,9 @@ pub fn scan() -> Vec<PathBuf> {
 }
 
 /// Built-ins first, then the scanned packages that load, without duplicates (same directory
-/// or same package id), then store packages (folder, .cdwidget) that are not installed or are
-/// newer than the installed one. Sorted by name.
-pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<(PathBuf, PathBuf)>) -> Vec<Entry> {
+/// or same package id), then store packages that are not installed or are newer than the
+/// installed one. Sorted by name.
+pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<crate::store::Item>) -> Vec<Entry> {
     let canon = |p: &Path| std::fs::canonicalize(p).unwrap_or_else(|_| p.to_path_buf());
     let mut seen_dirs: HashSet<PathBuf> = builtins.iter().map(|e| canon(&e.dir)).collect();
     let mut seen_ids: HashSet<String> = builtins.iter().map(|e| e.info.id.clone()).collect();
@@ -125,15 +126,30 @@ pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<(PathBuf, P
             Err(e) => eprintln!("calmdesk: skipping {}: {e}", dir.display()),
         }
     }
-    for (dir, file) in store {
-        let Ok(info) = package_info(&dir) else { continue };
+    for item in store {
+        let dir = item.dir();
+        // Downloaded: names in the display language. Else what the index says.
+        let info = match package_info(&dir) {
+            Ok(info) => info,
+            Err(_) => PackageInfo {
+                id: item.id.clone(),
+                name: item.name.clone(),
+                category: item.category.clone(),
+                variant: String::new(),
+                size: (0.0, 0.0),
+                author: item.author.clone(),
+                version: item.version.clone(),
+                homepage: String::new(),
+                icon: None,
+            },
+        };
         let source = match all.iter().find(|e| e.info.id == info.id) {
             Some(e) if !crate::update::newer(&info.version, &e.info.version) => continue,
             Some(_) => widgine::tr("Update available").into(),
             None if info.author.is_empty() => widgine::tr("Community").into(),
             None => info.author.clone(),
         };
-        all.push(Entry { dir, info, source, kind: Kind::Community, store: Some(file) });
+        all.push(Entry { dir, info, source, kind: Kind::Community, store: Some(item) });
     }
     all.sort_by_key(|e| e.info.name.to_lowercase());
     all

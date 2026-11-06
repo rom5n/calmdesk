@@ -1,77 +1,135 @@
 //! Community widgets from the store index (github.com/rom5n/calmdesk-widgets). The index is a
-//! text file, one package per line: `id<TAB>sha256<TAB>download url`. Its CI builds it from
-//! the reviewed packages.
+//! text file: "#" comment lines, then one package per line with tab-separated id, sha256,
+//! download url, version, author, category and name. Its CI builds it from the reviewed
+//! packages.
 //!
-//! Each package is downloaded once and unpacked into `data_dir()\store\packages\<sha256>`, so
-//! the gallery shows live previews. A click installs the kept `.cdwidget` (see `install.rs`).
+//! The gallery lists every package from the index alone. A package is downloaded only when its
+//! tile is shown (for the live preview) or picked, and unpacked into
+//! `data_dir()\store\packages\<sha256>`. Downloads not used for a month are deleted.
 
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
 
 const INDEX: &str = "https://github.com/rom5n/calmdesk-widgets/releases/download/packages/index.txt";
 /// The same limit as `install.rs` has for a .cdwidget.
 const MAX_FILE: &str = "20971520";
+const DAY: Duration = Duration::from_secs(24 * 60 * 60);
+
+/// One line of the index.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Item {
+    pub id: String,
+    pub sha: String,
+    pub url: String,
+    pub version: String,
+    pub author: String,
+    pub category: String,
+    pub name: String,
+}
+
+impl Item {
+    /// The unpacked package, once downloaded.
+    pub fn dir(&self) -> PathBuf {
+        self.dir_in(&dir())
+    }
+
+    fn dir_in(&self, store: &Path) -> PathBuf {
+        store.join("packages").join(&self.sha)
+    }
+
+    fn file_in(&self, store: &Path) -> PathBuf {
+        store.join("files").join(format!("{}.cdwidget", self.sha))
+    }
+}
 
 fn dir() -> PathBuf {
     crate::data_dir().join("store")
 }
 
-/// Fetches the index at most once a day, downloads what is new and forgets what left the
-/// index. Returns (package folder, .cdwidget) for every package ready to show. Offline: what
-/// was fetched before. Slow: call it off the UI thread.
-pub fn refresh() -> Vec<(PathBuf, PathBuf)> {
+/// Fetches the index at most once a day and deletes downloads that left the index or were not
+/// used for a month. Offline: the index fetched before. Slow: call it off the UI thread.
+pub fn refresh() -> Vec<Item> {
     let dir = dir();
     let index = dir.join("index.txt");
-    let day = Duration::from_secs(24 * 60 * 60);
-    let fresh = std::fs::metadata(&index).and_then(|m| m.modified()).is_ok_and(|t| SystemTime::now().duration_since(t).unwrap_or_default() < day);
-    if !fresh {
-        if let Some(text) = crate::feeds::curl(INDEX).filter(|t| parse(t).count() == t.lines().filter(|l| !l.trim().is_empty()).count()) {
+    if age(&index) >= DAY {
+        let complete = |t: &String| parse(t).count() == t.lines().filter(|l| !l.trim().is_empty() && !l.starts_with('#')).count() && t.starts_with('#');
+        if let Some(text) = crate::feeds::curl(INDEX).filter(complete) {
             let _ = std::fs::create_dir_all(&dir);
             let _ = std::fs::write(&index, text);
         }
     }
-    let text = std::fs::read_to_string(&index).unwrap_or_default();
-    let (files, packages) = (dir.join("files"), dir.join("packages"));
-    let mut ready = Vec::new();
-    for (id, sha, url) in parse(&text) {
-        let file = files.join(format!("{sha}.cdwidget"));
-        let pkg = packages.join(sha);
-        if !file.is_file() && !download(url, &file, sha) {
-            continue;
-        }
-        if !pkg.is_dir() {
-            if let Err(e) = unpack(&file, &pkg) {
-                eprintln!("calmdesk: store {id}: {e}");
-                continue;
-            }
-        }
-        // The index names the package; a package claiming another id is not shown.
-        match widgine::package_info(&pkg) {
-            Ok(info) if info.id == id => ready.push((pkg, file)),
-            _ => eprintln!("calmdesk: store {id}: not the package the index names"),
-        }
-    }
-    // Packages that left the index, or were updated.
-    let keep: Vec<String> = parse(&text).map(|(_, sha, _)| sha.to_string()).collect();
-    for d in [&files, &packages] {
+    let items: Vec<Item> = parse(&std::fs::read_to_string(&index).unwrap_or_default()).collect();
+    for d in [dir.join("files"), dir.join("packages")] {
         for e in std::fs::read_dir(d).into_iter().flatten().flatten() {
             let name = e.file_name().to_string_lossy().into_owned();
-            if !keep.iter().any(|k| name.starts_with(k.as_str())) {
+            let listed = items.iter().any(|i| name.starts_with(i.sha.as_str()));
+            if !listed || age(&e.path()) > 30 * DAY {
                 let _ = std::fs::remove_dir_all(e.path()).or_else(|_| std::fs::remove_file(e.path()));
             }
         }
     }
-    ready
+    items
 }
 
-/// (id, sha256, url) of each well-formed line.
-fn parse(text: &str) -> impl Iterator<Item = (&str, &str, &str)> {
-    text.lines().filter_map(|l| {
-        let mut f = l.trim().split('\t');
-        let (id, sha, url) = (f.next()?, f.next()?, f.next()?);
+/// Time since `path` was written; very long when it is missing.
+fn age(path: &Path) -> Duration {
+    let written = std::fs::metadata(path).and_then(|m| m.modified()).unwrap_or(SystemTime::UNIX_EPOCH);
+    SystemTime::now().duration_since(written).unwrap_or_default()
+}
+
+fn parse(text: &str) -> impl Iterator<Item = Item> + '_ {
+    text.lines().filter(|l| !l.starts_with('#')).filter_map(|l| {
+        let f: Vec<&str> = l.trim_end_matches('\r').split('\t').collect();
+        let [id, sha, url, version, author, category, name] = f[..] else { return None };
         let ok = !id.is_empty() && sha.len() == 64 && sha.bytes().all(|b| b.is_ascii_hexdigit()) && url.starts_with("https://");
-        ok.then_some((id, sha, url))
+        let s = |x: &str| x.to_string();
+        ok.then(|| Item { id: s(id), sha: sha.to_ascii_lowercase(), url: s(url), version: s(version), author: s(author), category: s(category), name: s(name) })
     })
+}
+
+/// Shas being downloaded, so each is fetched once at a time.
+static FETCHING: Mutex<Option<HashSet<String>>> = Mutex::new(None);
+
+/// Downloads and unpacks `item` on a thread of its own, then calls `done`. Does nothing when
+/// it is there already or on its way.
+pub fn fetch(item: &Item, done: impl FnOnce() + Send + 'static) {
+    if item.dir().is_dir() || !FETCHING.lock().unwrap().get_or_insert_default().insert(item.sha.clone()) {
+        return;
+    }
+    let item = item.clone();
+    std::thread::spawn(move || {
+        if let Err(e) = get(&item) {
+            eprintln!("calmdesk: store {}: {e}", item.id);
+        }
+        FETCHING.lock().unwrap().get_or_insert_default().remove(&item.sha);
+        done();
+    });
+}
+
+/// Downloads `item` if needed, unpacks it, and returns its .cdwidget. Blocks.
+pub fn get(item: &Item) -> Result<PathBuf, String> {
+    get_in(&dir(), item)
+}
+
+fn get_in(store: &Path, item: &Item) -> Result<PathBuf, String> {
+    let file = item.file_in(store);
+    if !file.is_file() && !download(&item.url, &file, &item.sha) {
+        return Err(format!("{}: download failed or the file does not match the index", item.url));
+    }
+    let pkg = item.dir_in(store);
+    if !pkg.is_dir() {
+        unpack(&file, &pkg)?;
+    }
+    // The index names the package; a package claiming another id is not used.
+    match widgine::package_info(&pkg) {
+        Ok(info) if info.id == item.id => Ok(file),
+        _ => {
+            let _ = std::fs::remove_dir_all(&pkg);
+            Err("not the package the index names".into())
+        }
+    }
 }
 
 /// Downloads `url` to `file` when its SHA-256 is `sha`.
@@ -117,10 +175,30 @@ mod tests {
     #[test]
     fn index_lines() {
         let sha = "a".repeat(64);
-        let text = format!("com.a.b\t{sha}\thttps://x/y.cdwidget\nbad line\ncom.c\tshort\thttps://x\n\n");
+        let text = format!("# index\ncom.a.b\t{sha}\thttps://x/y.cdwidget\t1.0\tMe\tTime\tBig Clock\nbad line\ncom.c\tshort\thttps://x\t1\ta\tb\tc\n\n");
         let got: Vec<_> = super::parse(&text).collect();
-        assert_eq!(got, vec![("com.a.b", sha.as_str(), "https://x/y.cdwidget")]);
+        assert_eq!(got.len(), 1);
+        assert_eq!((got[0].id.as_str(), got[0].name.as_str(), got[0].version.as_str()), ("com.a.b", "Big Clock", "1.0"));
         let file = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("Cargo.toml");
         assert_eq!(super::sha256(&file).map(|h| h.len()), Some(64));
+    }
+
+    /// A downloaded file is unpacked and checked against the index's id.
+    #[test]
+    fn get_unpacks_and_checks_the_id() {
+        let root = std::env::temp_dir().join(format!("calmdesk-store-test-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let src = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../widgets/clock");
+        let id = widgine::package_info(&src).unwrap().id;
+        let item = |id: &str| super::Item { id: id.into(), sha: "c".repeat(64), url: "https://x".into(), version: "1".into(), author: "a".into(), category: "Time".into(), name: "n".into() };
+        let file = item(&id).file_in(&root);
+        std::fs::create_dir_all(file.parent().unwrap()).unwrap();
+        let ok = std::process::Command::new("tar.exe").args(["--format", "zip", "-cf"]).arg(&file).arg("-C").arg(&src).arg(".").status().unwrap().success();
+        assert!(ok);
+        assert!(super::get_in(&root, &item("com.someone.else")).is_err());
+        assert!(!item(&id).dir_in(&root).exists());
+        assert_eq!(super::get_in(&root, &item(&id)).unwrap(), file);
+        assert!(item(&id).dir_in(&root).join("widget.toml").is_file());
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

@@ -47,8 +47,16 @@ thread_local! {
 
 /// Packages found by the background scan, for the UI thread.
 static SCANNED: Mutex<Option<Vec<PathBuf>>> = Mutex::new(None);
-/// Store packages ready to show: (folder, .cdwidget).
-static STORE: Mutex<Vec<(PathBuf, PathBuf)>> = Mutex::new(Vec::new());
+/// The store index.
+static STORE: Mutex<Vec<store::Item>> = Mutex::new(Vec::new());
+/// The tray window, for threads that post to it.
+static TRAY_HWND: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
+
+/// From any thread: merge the scan results and the store again (WM_APP_SCANNED).
+pub(crate) fn post_scanned() {
+    let tray = TRAY_HWND.load(std::sync::atomic::Ordering::Relaxed);
+    let _ = unsafe { PostMessageW(Some(HWND(tray as _)), shell::WM_APP_SCANNED, WPARAM(0), LPARAM(0)) };
+}
 
 /// Settings and positions live next to the engine's (named after the exe),
 /// `%LOCALAPPDATA%\calmdesk`.
@@ -231,7 +239,7 @@ fn add(entry: &Entry, drag: bool) {
     // A store widget: install it first, then add the installed one.
     let installed;
     let entry = match &entry.store {
-        Some(file) => match install::install(file, |_, _| true) {
+        Some(item) => match store::get(item).and_then(|file| install::install(&file, |_, _| true)) {
             Ok(Some((info, dir))) => {
                 start_scan();
                 installed = Entry { dir, info, source: String::new(), kind: catalog::Kind::App, store: None };
@@ -239,7 +247,7 @@ fn add(entry: &Entry, drag: bool) {
             }
             Ok(None) => return,
             Err(e) => {
-                eprintln!("calmdesk: install {}: {e}", file.display());
+                eprintln!("calmdesk: install {}: {e}", item.id);
                 message(&format!("{}
 {}
 
@@ -280,24 +288,24 @@ fn open_gallery() {
 }
 
 fn start_scan() {
-    let tray = TRAY.get().0 as isize;
     std::thread::spawn(move || {
         let found = catalog::scan();
         *SCANNED.lock().unwrap() = Some(found);
-        let post = || unsafe { PostMessageW(Some(HWND(tray as _)), shell::WM_APP_SCANNED, WPARAM(0), LPARAM(0)) };
-        let _ = post();
-        // The store may download: the gallery shows the other widgets meanwhile.
+        post_scanned();
+        // The index may take a while to fetch: the gallery shows the other widgets meanwhile.
         *STORE.lock().unwrap() = store::refresh();
-        let _ = post();
+        post_scanned();
     });
 }
 
 fn scanned() {
     let Some(found) = SCANNED.lock().unwrap().clone() else { return };
     let entries = catalog::merge(catalog::builtins(), found, STORE.lock().unwrap().clone());
+    // A store package that finished downloading changes only whether its folder exists.
+    let key = |x: &Entry| (x.dir.clone(), x.dir.is_dir());
     let changed = ENTRIES.with(|e| {
-        let old: Vec<PathBuf> = e.borrow().iter().map(|x| x.dir.clone()).collect();
-        let new: Vec<PathBuf> = entries.iter().map(|x| x.dir.clone()).collect();
+        let old: Vec<_> = e.borrow().iter().map(key).collect();
+        let new: Vec<_> = entries.iter().map(key).collect();
         *e.borrow_mut() = entries;
         old != new
     });
@@ -511,6 +519,7 @@ fn main() -> windows::core::Result<()> {
 
     let tray = shell::create_tray(request, tray_menu)?;
     TRAY.set(tray);
+    TRAY_HWND.store(tray.0 as isize, std::sync::atomic::Ordering::Relaxed);
     // Apps that fed their widgets before this start send their values again.
     remote::announce();
     if background {
