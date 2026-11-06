@@ -121,7 +121,8 @@ fn copy_data(from: &Path, to: &Path) -> std::io::Result<()> {
     std::fs::create_dir_all(to)?;
     for entry in std::fs::read_dir(from)?.flatten() {
         let name = entry.file_name().to_string_lossy().into_owned();
-        if name.ends_with(".log") || name.starts_with("crash-") {
+        // Downloads and the profiles' own copies are not part of a backup.
+        if name.ends_with(".log") || name.starts_with("crash-") || ["store", "install", "profiles"].contains(&name.as_str()) {
             continue;
         }
         let target = to.join(&name);
@@ -135,6 +136,59 @@ fn copy_data(from: &Path, to: &Path) -> std::io::Result<()> {
 }
 
 /// Starts a new instance (which waits for this one to exit) and quits. `extra`: its arguments.
+/// Profiles: `data_dir()\profiles\<name>` with the desktop's layout files. Notes, tasks and
+/// settings stay shared. Rename or delete a profile by its folder.
+const PROFILE_FILES: [&str; 2] = ["instances.txt", "widgets.ini"];
+
+fn profiles_dir() -> PathBuf {
+    data_dir().join("profiles")
+}
+
+/// Profile names, sorted.
+fn profiles() -> Vec<String> {
+    let mut names: Vec<String> = std::fs::read_dir(profiles_dir()).into_iter().flatten().flatten().filter(|e| e.path().is_dir()).map(|e| e.file_name().to_string_lossy().into_owned()).collect();
+    names.sort_by_key(|n| n.to_lowercase());
+    names
+}
+
+/// Copies the layout files from `from` to `to`; a missing file is removed at `to`.
+fn copy_layout(from: &Path, to: &Path) -> std::io::Result<()> {
+    std::fs::create_dir_all(to)?;
+    for f in PROFILE_FILES {
+        if from.join(f).is_file() {
+            std::fs::copy(from.join(f), to.join(f))?;
+        } else {
+            let _ = std::fs::remove_file(to.join(f));
+        }
+    }
+    Ok(())
+}
+
+/// "Save as new profile": the current desktop as "Profile N", which becomes the current one.
+fn save_new_profile() {
+    let existing = profiles();
+    let name = (1..).map(|n| format!("{} {n}", tr("Profile"))).find(|n| !existing.contains(n)).unwrap_or_default();
+    match copy_layout(&data_dir(), &profiles_dir().join(&name)) {
+        Ok(()) => set_setting("profile", &name),
+        Err(e) => eprintln!("calmdesk: save profile {name}: {e}"),
+    }
+}
+
+/// At start, with `--profile <name>`: keeps the desktop the last instance left in its profile,
+/// then brings in `name`'s.
+fn switch_profile(name: &str) {
+    if let Some(current) = setting("profile").filter(|c| profiles_dir().join(c).is_dir()) {
+        if let Err(e) = copy_layout(&data_dir(), &profiles_dir().join(current)) {
+            eprintln!("calmdesk: save profile: {e}");
+            return;
+        }
+    }
+    match copy_layout(&profiles_dir().join(name), &data_dir()) {
+        Ok(()) => set_setting("profile", name),
+        Err(e) => eprintln!("calmdesk: open profile {name}: {e}"),
+    }
+}
+
 fn restart(extra: &[&str]) {
     let _ = std::process::Command::new(std::env::current_exe().unwrap_or_default()).args(["--background", "--restart"]).args(extra).spawn();
     unsafe { PostQuitMessage(0) };
@@ -331,6 +385,11 @@ fn tray_menu() -> Vec<MenuItem> {
     let lang = setting("lang").unwrap_or_default();
     let mut languages = vec![MenuItem::new(tr("System default"), "lang:").checked(lang.is_empty())];
     languages.extend(LANGUAGES.iter().map(|(code, name)| MenuItem::new(name, &format!("lang:{code}")).checked(lang == *code)));
+    let current = setting("profile").unwrap_or_default();
+    let mut profile_items: Vec<MenuItem> = profiles().iter().map(|p| MenuItem::new(p, &format!("profile:{p}")).checked(*p == current)).collect();
+    profile_items.push(MenuItem::new(tr("Save as new profile"), "profile-new"));
+    profile_items.push(MenuItem::new(tr("Open profiles folder"), "profiles"));
+    items.push(MenuItem::submenu(tr("Profiles"), profile_items));
     let settings = vec![
         MenuItem::new(tr("Start with Windows"), "autostart").checked(shell::autostart()),
         MenuItem::new(tr("Hide widgets during fullscreen apps"), "fullscreen").checked(setting("fullscreen").as_deref() != Some("show")),
@@ -390,6 +449,11 @@ fn request(r: shell::Request) {
                 message(&format!("{}\n{}", tr("No backup found:"), backup_dir().display()), MB_OK | MB_ICONWARNING);
             }
             "logs" => feeds::open(&data_dir().display().to_string()),
+            "profile-new" => save_new_profile(),
+            "profiles" => {
+                let _ = std::fs::create_dir_all(profiles_dir());
+                feeds::open(&profiles_dir().display().to_string());
+            }
             "check-update" => check_for_updates(),
             "update" => {
                 if let Some((_, url)) = update::available() {
@@ -402,7 +466,12 @@ fn request(r: shell::Request) {
             }
             "quit" => unsafe { PostQuitMessage(0) },
             a => {
-                if let Some(code) = a.strip_prefix("lang:") {
+                if let Some(name) = a.strip_prefix("profile:") {
+                    // The new instance switches, after this one has saved its last state.
+                    if Some(name) != setting("profile").as_deref() {
+                        restart(&["--profile", name]);
+                    }
+                } else if let Some(code) = a.strip_prefix("lang:") {
                     set_setting("lang", code);
                     restart(&[]);
                 }
@@ -485,6 +554,9 @@ fn main() -> windows::core::Result<()> {
 
     if moved {
         shell::migrate();
+    }
+    if let Some(name) = args.iter().position(|a| a == "--profile").and_then(|i| args.get(i + 1)) {
+        switch_profile(name);
     }
     if args.iter().any(|a| a == "--import") {
         if let Err(e) = copy_data(&backup_dir(), &data_dir()) {
