@@ -37,7 +37,7 @@ pub fn available() -> Option<(String, String)> {
 }
 
 /// "v0.2.0" is newer than "0.1.3": numbers compared part by part.
-fn newer(tag: &str, current: &str) -> bool {
+pub(crate) fn newer(tag: &str, current: &str) -> bool {
     let parts = |v: &str| v.trim_start_matches('v').split('.').map(|p| p.parse::<u32>().unwrap_or(0)).collect::<Vec<_>>();
     parts(tag) > parts(current)
 }

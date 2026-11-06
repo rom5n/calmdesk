@@ -11,7 +11,7 @@ use widgine::windows::core::Result;
 use widgine::windows_numerics::Vector2;
 use widgine::{Background, Card, Customization, Event, LayerId, Scene, Widget, rgba};
 
-use crate::catalog::Entry;
+use crate::catalog::{Entry, Kind};
 
 pub const ID: &str = "gallery";
 pub const SIZE: (f32, f32) = (800.0, 540.0);
@@ -20,6 +20,8 @@ pub const SIZE: (f32, f32) = (800.0, 540.0);
 const SIDE: f32 = 200.0;
 const ROW: f32 = 34.0;
 const LIST_TOP: f32 = 64.0;
+/// Room for a group caption ("Built-in", "Other apps", "Community") above its categories.
+const CAPTION: f32 = 28.0;
 /// The search field above the categories, as wide as their rows: left, top, right, bottom.
 const SEARCH: (f32, f32, f32, f32) = (14.0, 20.0, SIDE - 14.0, 48.0);
 const CONTENT_X: f32 = SIDE + 24.0;
@@ -79,18 +81,36 @@ impl Gallery {
         Self { entries, add, selected: 0, first: 0, hover: None, press: None, hits: Vec::new(), base: None, at_end: true, query: String::new() }
     }
 
-    /// (name, widget count), sorted.
-    fn categories(&self) -> Vec<(String, usize)> {
-        let mut cats: Vec<(String, usize)> = Vec::new();
+    /// (group, category, widget count): grouped by where the widgets come from, then by name.
+    fn categories(&self) -> Vec<(Kind, String, usize)> {
+        let mut cats: Vec<(Kind, String, usize)> = Vec::new();
         for e in self.entries.borrow().iter() {
             let c = e.category();
-            match cats.iter_mut().find(|(n, _)| *n == c) {
-                Some(x) => x.1 += 1,
-                None => cats.push((c, 1)),
+            match cats.iter_mut().find(|(k, n, _)| *k == e.kind && *n == c) {
+                Some(x) => x.2 += 1,
+                None => cats.push((e.kind, c, 1)),
             }
         }
-        cats.sort_by_key(|(n, _)| n.to_lowercase());
+        cats.sort_by_key(|(k, n, _)| (*k, n.to_lowercase()));
         cats
+    }
+
+    /// Top of each sidebar row ("All widgets", then `cats`) and the group captions (top, label).
+    /// No captions while every widget is built-in.
+    fn sidebar(cats: &[(Kind, String, usize)]) -> (Vec<f32>, Vec<(f32, &'static str)>) {
+        let grouped = cats.iter().any(|c| c.0 != Kind::Builtin);
+        let mut tops = vec![LIST_TOP];
+        let mut captions = Vec::new();
+        let mut y = LIST_TOP + ROW;
+        for (i, (kind, ..)) in cats.iter().enumerate() {
+            if grouped && (i == 0 || cats[i - 1].0 != *kind) {
+                captions.push((y, group_label(*kind)));
+                y += CAPTION;
+            }
+            tops.push(y);
+            y += ROW;
+        }
+        (tops, captions)
     }
 
     /// Shown by the search: the name, category, variant or source contains the query.
@@ -104,16 +124,17 @@ impl Gallery {
         let entries = self.entries.borrow();
         let cats = self.categories();
         let mut lines = Vec::new();
-        for (k, (cat, _)) in cats.iter().enumerate() {
+        let grouped = cats.iter().any(|c| c.0 != Kind::Builtin);
+        for (k, (kind, cat, _)) in cats.iter().enumerate() {
             if self.selected != 0 && self.selected != k + 1 {
                 continue;
             }
-            let ids: Vec<usize> = (0..entries.len()).filter(|&i| entries[i].category() == *cat && self.matches(&entries[i])).collect();
+            let ids: Vec<usize> = (0..entries.len()).filter(|&i| entries[i].kind == *kind && entries[i].category() == *cat && self.matches(&entries[i])).collect();
             if ids.is_empty() {
                 continue;
             }
             if self.selected == 0 {
-                lines.push(Line::Header(cat.clone()));
+                lines.push(Line::Header(if grouped && *kind != Kind::Builtin { format!("{} · {cat}", group_label(*kind)) } else { cat.clone() }));
             }
             lines.extend(ids.chunks(COLUMNS).map(|c| Line::Tiles(c.to_vec())));
         }
@@ -207,9 +228,13 @@ impl Gallery {
             let cx = (tx + m.widthIncludingTrailingWhitespace + 1.0).min(tr_);
             ctx.FillRectangle(&rect(cx, my - 8.0, cx + 1.4, my + 8.0), &brush(theme.accent)?);
             let total = entries.len();
-            let rows = std::iter::once((widgine::tr("All widgets").to_string(), total)).chain(cats.iter().cloned());
+            let (tops, captions) = Self::sidebar(&cats);
+            for (t, label) in &captions {
+                text(label, &small, 26.0, *t + 6.0, SIDE - 26.0, *t + CAPTION - 4.0, ink(0.45))?;
+            }
+            let rows = std::iter::once((widgine::tr("All widgets").to_string(), total)).chain(cats.iter().map(|(_, c, n)| (c.clone(), *n)));
             for (k, (label, n)) in rows.enumerate() {
-                let t = LIST_TOP + k as f32 * ROW;
+                let t = tops[k];
                 let selected = k == self.selected;
                 if selected {
                     pill(14.0, t, SIDE - 14.0, t + ROW - 2.0, 10.0, theme.accent)?;
@@ -223,7 +248,8 @@ impl Gallery {
                 text(&n.to_string(), &count, SIDE - 60.0, t, SIDE - 26.0, t + ROW - 2.0, c2)?;
                 // A short hairline under the label, not next to a highlighted row.
                 let lit = |r: usize| r == self.selected || hover == Some(Hit::Category(r));
-                if k < cats.len() && !lit(k) && !lit(k + 1) {
+                let last_of_group = k < cats.len() && tops[k + 1] > t + ROW;
+                if k < cats.len() && !last_of_group && !lit(k) && !lit(k + 1) {
                     ctx.FillRectangle(&rect(54.0, t + ROW - 1.5, SIDE - 26.0, t + ROW - 0.5), &brush(ink(0.08))?);
                 }
             }
@@ -292,15 +318,10 @@ impl Widget for Gallery {
 
     fn build(&mut self, scene: &mut Scene) -> Result<()> {
         self.base = Some(scene.add_layer(0.0, 0.0, SIZE.0, SIZE.1)?);
-        let n_cats = self.categories().len();
-        self.selected = self.selected.min(n_cats);
+        let cats = self.categories();
+        self.selected = self.selected.min(cats.len());
         // Hit areas and previews of what is visible.
-        self.hits = (0..=n_cats)
-            .map(|k| {
-                let t = LIST_TOP + k as f32 * ROW;
-                (rect(14.0, t, SIDE - 14.0, t + ROW - 2.0), Hit::Category(k))
-            })
-            .collect();
+        self.hits = Self::sidebar(&cats).0.into_iter().enumerate().map(|(k, t)| (rect(14.0, t, SIDE - 14.0, t + ROW - 2.0), Hit::Category(k))).collect();
         let (sl, st, sr, sb) = SEARCH;
         if !self.query.is_empty() {
             self.hits.push((rect(sr - 24.0, st, sr, sb), Hit::Clear));
@@ -483,6 +504,14 @@ unsafe fn category_icon(ctx: &ID2D1DeviceContext, d2d: &ID2D1Factory1, category:
         }
     }
     Ok(())
+}
+
+fn group_label(kind: Kind) -> &'static str {
+    match kind {
+        Kind::Builtin => widgine::tr("Built-in"),
+        Kind::App => widgine::tr("Other apps"),
+        Kind::Community => widgine::tr("Community"),
+    }
 }
 
 fn rect(left: f32, top: f32, right: f32, bottom: f32) -> D2D_RECT_F {

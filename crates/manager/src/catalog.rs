@@ -22,8 +22,19 @@ use windows::Win32::System::Registry::*;
 pub struct Entry {
     pub dir: PathBuf,
     pub info: PackageInfo,
-    /// Where it comes from: "Built-in" or the app's folder name.
+    /// Under the name on its tile: "Built-in", the app's folder name, or a store widget's author.
     pub source: String,
+    pub kind: Kind,
+    /// Store widgets: the .cdwidget to install when the user picks it.
+    pub store: Option<PathBuf>,
+}
+
+/// The gallery groups widgets by where they come from, in this order.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Kind {
+    Builtin,
+    App,
+    Community,
 }
 
 impl Entry {
@@ -56,7 +67,7 @@ pub fn builtins() -> Vec<Entry> {
         .filter(|d| d.join("widget.toml").is_file())
         .filter_map(|dir| {
             let info = package_info(&dir).map_err(|e| eprintln!("calmdesk: {e}")).ok()?;
-            Some(Entry { dir, info, source: widgine::tr("Built-in").into() })
+            Some(Entry { dir, info, source: widgine::tr("Built-in").into(), kind: Kind::Builtin, store: None })
         })
         .collect();
     // Like `merge`: by name, variants of one widget in folder order.
@@ -94,8 +105,9 @@ pub fn scan() -> Vec<PathBuf> {
 }
 
 /// Built-ins first, then the scanned packages that load, without duplicates (same directory
-/// or same package id), sorted by name.
-pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>) -> Vec<Entry> {
+/// or same package id), then store packages (folder, .cdwidget) that are not installed or are
+/// newer than the installed one. Sorted by name.
+pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<(PathBuf, PathBuf)>) -> Vec<Entry> {
     let canon = |p: &Path| std::fs::canonicalize(p).unwrap_or_else(|_| p.to_path_buf());
     let mut seen_dirs: HashSet<PathBuf> = builtins.iter().map(|e| canon(&e.dir)).collect();
     let mut seen_ids: HashSet<String> = builtins.iter().map(|e| e.info.id.clone()).collect();
@@ -107,11 +119,21 @@ pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>) -> Vec<Entry> {
         match package_info(&dir) {
             Ok(info) if seen_ids.insert(info.id.clone()) => {
                 let source = app_folder(&dir);
-                all.push(Entry { dir, info, source });
+                all.push(Entry { dir, info, source, kind: Kind::App, store: None });
             }
             Ok(_) => {}
             Err(e) => eprintln!("calmdesk: skipping {}: {e}", dir.display()),
         }
+    }
+    for (dir, file) in store {
+        let Ok(info) = package_info(&dir) else { continue };
+        let source = match all.iter().find(|e| e.info.id == info.id) {
+            Some(e) if !crate::update::newer(&info.version, &e.info.version) => continue,
+            Some(_) => widgine::tr("Update available").into(),
+            None if info.author.is_empty() => widgine::tr("Community").into(),
+            None => info.author.clone(),
+        };
+        all.push(Entry { dir, info, source, kind: Kind::Community, store: Some(file) });
     }
     all.sort_by_key(|e| e.info.name.to_lowercase());
     all

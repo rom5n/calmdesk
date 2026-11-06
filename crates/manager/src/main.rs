@@ -13,6 +13,7 @@ mod events;
 mod feeds;
 mod gallery;
 mod install;
+mod store;
 mod log;
 mod shell;
 mod remote;
@@ -46,6 +47,8 @@ thread_local! {
 
 /// Packages found by the background scan, for the UI thread.
 static SCANNED: Mutex<Option<Vec<PathBuf>>> = Mutex::new(None);
+/// Store packages ready to show: (folder, .cdwidget).
+static STORE: Mutex<Vec<(PathBuf, PathBuf)>> = Mutex::new(Vec::new());
 
 /// Settings and positions live next to the engine's (named after the exe),
 /// `%LOCALAPPDATA%\calmdesk`.
@@ -225,6 +228,27 @@ fn feed_media(id: &str) {
 
 /// From the gallery: a new widget, following the pointer or placed in the middle of the screen.
 fn add(entry: &Entry, drag: bool) {
+    // A store widget: install it first, then add the installed one.
+    let installed;
+    let entry = match &entry.store {
+        Some(file) => match install::install(file, |_, _| true) {
+            Ok(Some((info, dir))) => {
+                start_scan();
+                installed = Entry { dir, info, source: String::new(), kind: catalog::Kind::App, store: None };
+                &installed
+            }
+            Ok(None) => return,
+            Err(e) => {
+                eprintln!("calmdesk: install {}: {e}", file.display());
+                message(&format!("{}
+{}
+
+{e}", tr("Installation failed:"), entry.info.name), MB_OK | MB_ICONWARNING);
+                return;
+            }
+        },
+        None => entry,
+    };
     let id = new_id(&entry.info.id);
     let opened = if drag {
         widgine::drag_out(&id, &entry.dir)
@@ -260,13 +284,17 @@ fn start_scan() {
     std::thread::spawn(move || {
         let found = catalog::scan();
         *SCANNED.lock().unwrap() = Some(found);
-        let _ = unsafe { PostMessageW(Some(HWND(tray as _)), shell::WM_APP_SCANNED, WPARAM(0), LPARAM(0)) };
+        let post = || unsafe { PostMessageW(Some(HWND(tray as _)), shell::WM_APP_SCANNED, WPARAM(0), LPARAM(0)) };
+        let _ = post();
+        // The store may download: the gallery shows the other widgets meanwhile.
+        *STORE.lock().unwrap() = store::refresh();
+        let _ = post();
     });
 }
 
 fn scanned() {
-    let Some(found) = SCANNED.lock().unwrap().take() else { return };
-    let entries = catalog::merge(catalog::builtins(), found);
+    let Some(found) = SCANNED.lock().unwrap().clone() else { return };
+    let entries = catalog::merge(catalog::builtins(), found, STORE.lock().unwrap().clone());
     let changed = ENTRIES.with(|e| {
         let old: Vec<PathBuf> = e.borrow().iter().map(|x| x.dir.clone()).collect();
         let new: Vec<PathBuf> = entries.iter().map(|x| x.dir.clone()).collect();

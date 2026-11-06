@@ -22,8 +22,8 @@ pub fn widgets_dir() -> PathBuf {
 }
 
 /// Installs `file`. `confirm(info, replacing)` asks the user; false leaves everything as it
-/// was. Ok(Some(info)) when installed, Ok(None) when the user said no.
-pub fn install(file: &Path, confirm: impl Fn(&PackageInfo, bool) -> bool) -> Result<Option<PackageInfo>, String> {
+/// was. Ok(Some((info, folder))) when installed, Ok(None) when the user said no.
+pub fn install(file: &Path, confirm: impl Fn(&PackageInfo, bool) -> bool) -> Result<Option<(PackageInfo, PathBuf)>, String> {
     // In the data folder: on the same drive as the widgets folder, so the move is a rename.
     let work = crate::data_dir().join("install");
     let _ = std::fs::remove_dir_all(&work);
@@ -32,7 +32,7 @@ pub fn install(file: &Path, confirm: impl Fn(&PackageInfo, bool) -> bool) -> Res
     result
 }
 
-fn unpack_and_move(file: &Path, work: &Path, widgets: &Path, confirm: impl Fn(&PackageInfo, bool) -> bool) -> Result<Option<PackageInfo>, String> {
+fn unpack_and_move(file: &Path, work: &Path, widgets: &Path, confirm: impl Fn(&PackageInfo, bool) -> bool) -> Result<Option<(PackageInfo, PathBuf)>, String> {
     let dir = unpack(file, &work.join("new"))?;
     let info = widgine::package_info(&dir).map_err(|e| e.to_string())?;
     let target = widgets.join(folder_name(&info.id));
@@ -51,12 +51,12 @@ fn unpack_and_move(file: &Path, work: &Path, widgets: &Path, confirm: impl Fn(&P
         }
         return Err(format!("{}: {e}", target.display()));
     }
-    Ok(Some(info))
+    Ok(Some((info, target)))
 }
 
 /// Unpacks `file` into `into` (made fresh) and returns the package folder in it: `into` itself,
 /// or its only subfolder when the zip holds one folder.
-fn unpack(file: &Path, into: &Path) -> Result<PathBuf, String> {
+pub(crate) fn unpack(file: &Path, into: &Path) -> Result<PathBuf, String> {
     let bytes = std::fs::metadata(file).map_err(|e| format!("{}: {e}", file.display()))?.len();
     if bytes > MAX_FILE {
         return Err(format!("{}: larger than {} MB", file.display(), MAX_FILE >> 20));
@@ -161,8 +161,7 @@ mod tests {
         assert!(zip_totals(b"not a zip at all, just some text here").is_none());
 
         let widgets = root.join("Widgets");
-        let installed = unpack_and_move(&file, &root.join("work1"), &widgets, |_, replacing| !replacing).unwrap().unwrap();
-        let target = widgets.join(folder_name(&installed.id));
+        let (_, target) = unpack_and_move(&file, &root.join("work1"), &widgets, |_, replacing| !replacing).unwrap().unwrap();
         assert!(target.join("layout.xml").is_file());
         // Declined: nothing changes.
         std::fs::write(target.join("marker"), "old").unwrap();
@@ -179,6 +178,22 @@ mod tests {
         let bad = root.join("bad.cdwidget");
         pack(&empty, &bad);
         assert!(unpack_and_move(&bad, &root.join("work4"), &widgets, |_, _| true).is_err());
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn zip_with_one_folder() {
+        let root = std::env::temp_dir().join(format!("calmdesk-unpack-test-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let src = root.join("src");
+        let pkg = src.join("clock");
+        std::fs::create_dir_all(&pkg).unwrap();
+        for f in ["widget.toml", "layout.xml"] {
+            std::fs::copy(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../widgets/clock").join(f), pkg.join(f)).unwrap();
+        }
+        let file = root.join("c.cdwidget");
+        pack(&src, &file);
+        assert_eq!(unpack(&file, &root.join("out")).unwrap(), root.join("out").join("clock"));
         let _ = std::fs::remove_dir_all(&root);
     }
 

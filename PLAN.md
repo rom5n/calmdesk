@@ -53,40 +53,32 @@ and nothing clipped in light and dark mode.
 
 ## Phase 1: reach users
 
-### 1. Widget store in the gallery
+### 1. Widget store in the gallery (done in code; index repo not on GitHub yet)
 
-A "Community" category in the gallery, listing packages from a public index.
+A "Community" group in the gallery, listing packages from a public index.
 
-- **Index:** new repo `rom5n/calmdesk-widgets`. One `index.json` built by CI from
-  `packages/<id>/` folders. Each entry has `id`, `name`, `author`, `category`, `version`,
-  `size`, `download` (release asset URL of a `.cdwidget`), `sha256`, `icon` and `preview`
-  (PNG). Authors list a widget with a PR. CI checks the package with `widget-dev --check`
-  (new flag, engine repo: load the package, exit non-zero on errors). CI rejects an id that
-  collides with an existing package by another author.
-- **Icon required:** every community package must have an icon: `icon = "assets/icon.svg"` in
-  `widget.toml` (SVG, or a PNG of at least 64×64 px, square). CI rejects packages without
-  one, or with a missing or wrong-size file. The gallery shows the icon on the store tile,
-  in search results, in the install dialog (item 2), and in update notices. Built-in widgets
-  don't need one; local packages without an icon get a generic one.
-- **Manager:** `crates/manager/src/store.rs`. Fetches `index.json` at most once a day, caches it
-  in `data_dir()\store\index.json`, caches previews in `data_dir()\store\previews\`.
-  Install: download, check `sha256`, extract with `tar.exe -xf` into a temp folder, validate
-  with `package_info`, then move into `%LOCALAPPDATA%\Widgets\<id>`. Reuses item 2's installer.
-- **Gallery:** `gallery.rs` gets a "Community" category. Tiles show the preview image (not a
-  live widget, the package is not on disk yet), name, author and an Install button. Installed
-  packages move to their own category with a live preview, as today.
-- **Updates:** on each index refresh, compare `version` with the installed `widget.toml`.
-  Newer: a dot on the tile and an "Update" button; "Update all" in the Community header.
-  Positions and settings survive because they key on `id`.
-- **Engine:** `widget.toml` gains optional `author`, `version`, `homepage`, `icon` (schema in
-  `schemas/widget.schema.json`, `PackageInfo` fields). Copy the schema here afterwards.
+- **Index:** repo `rom5n/calmdesk-widgets` (prepared in `../calmdesk-widgets`, not yet created
+  on GitHub). Authors add `packages/<id>/` with a PR. CI (`tools/build.py`) runs
+  `widget-dev --check`, requires `author`, `version` and a square icon (SVG, or PNG of at least
+  64×64 px), rejects reserved `dev.widget-engine.` ids and a folder not named after the id,
+  then packs every package and uploads `<id>-<version>.cdwidget` and `index.txt` to the
+  `packages` release. `index.txt`: one line per package, `id<TAB>sha256<TAB>url`. Plain text
+  instead of JSON: no parser needed, and names, categories and versions come from the package.
+- **Manager:** `store.rs`. Fetches `index.txt` at most once a day (release download URL, no API
+  rate limit), downloads new packages with curl (20 MB cap), checks `sha256` with certutil, and
+  unpacks each into `data_dir()\store\packages\<sha256>`. Previews are live widgets from those
+  folders, so no preview images. Packages that leave the index are deleted. Offline: the cache.
+- **Gallery:** the sidebar groups categories under "Built-in", "Other apps" and "Community"
+  captions (no captions while all widgets are built-in). A store tile shows the author. Clicking
+  or dragging it installs it through `install.rs`, then adds it like any widget.
+- **Updates:** a store package newer than the installed one (`version`) shows in Community
+  with "Update available"; picking it replaces the installed one. "Update all" not done.
+- **Engine:** `widget.toml` gained optional `author`, `version`, `homepage`, `icon` (schema,
+  `PackageInfo` fields; the icon must be a file in the package). Old engines reject these
+  fields (`deny_unknown_fields`), so store packages need widgine 0.1.1.
 
-Done when: a package merged into the index repo appears in the gallery within a day, installs
-in one click, updates in one click, and the gallery still opens instantly offline.
-
-Risks: GitHub raw/API rate limits (cache, one fetch a day, raw URLs instead of the API);
-malicious packages (declarative only, size cap on download and on extracted files, extraction
-into a temp folder with path checks, `sha256` from the index).
+Not done yet: showing the icon in the gallery (the live preview fills the tile); "Update all";
+a sidebar that scrolls when there are many categories.
 
 ### 2. `.cdwidget` files, double-click to install (done)
 

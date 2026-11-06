@@ -842,7 +842,7 @@ fn section<'a>(json: &'a str, name: &str) -> &'a str {
 pub(crate) fn curl(url: &str) -> Option<String> {
     use std::os::windows::process::CommandExt;
     const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-    let out = std::process::Command::new("curl.exe").args(["-s", "-m", "15", url]).creation_flags(CREATE_NO_WINDOW).output().ok()?;
+    let out = std::process::Command::new("curl.exe").args(["-sL", "-m", "15", url]).creation_flags(CREATE_NO_WINDOW).output().ok()?;
     out.status.success().then(|| String::from_utf8_lossy(&out.stdout).into_owned())
 }
 
