@@ -17,6 +17,8 @@ const WM_TRAY: u32 = WM_APP + 50;
 pub const WM_APP_OPEN: u32 = WM_APP + 51;
 /// The background scan finished.
 pub const WM_APP_SCANNED: u32 = WM_APP + 52;
+/// A gallery tile was right-clicked: show its menu.
+pub const WM_APP_TILE_MENU: u32 = WM_APP + 53;
 
 pub const APP_NAME: &str = "Calmdesk";
 const RUN_KEY: PCWSTR = w!(r"Software\Microsoft\Windows\CurrentVersion\Run");
@@ -26,6 +28,7 @@ const UNINSTALL_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Uninstal
 pub enum Request {
     Gallery,
     Scanned,
+    TileMenu,
     /// The `action` of the picked tray menu item.
     Menu(String),
     /// A `widgine::host` message from another app: its window, the fields.
@@ -123,6 +126,10 @@ extern "system" fn tray_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARA
                 }
                 None => LRESULT(0),
             },
+            WM_APP_TILE_MENU => {
+                handle(Request::TileMenu);
+                LRESULT(0)
+            }
             WM_APP_SCANNED => {
                 handle(Request::Scanned);
                 LRESULT(0)

@@ -105,6 +105,7 @@ pub fn start() {
 
 /// Feeds the widget `id` if its package is one of ours. Call on the engine's thread.
 pub fn add(id: &str, package_id: &str) {
+    let package_id = crate::remix::original(package_id);
     if crate::timers::add(id, package_id) {
         return;
     }
@@ -134,6 +135,7 @@ pub fn action(id: &str, action: &str) -> bool {
 
 /// What the gallery previews show.
 pub fn sample(package_id: &str) -> Values {
+    let package_id = crate::remix::original(package_id);
     let own = |v: &[(&str, &str)]| v.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect::<Values>();
     let tr = widgine::tr;
     match package_id.strip_prefix("dev.widget-engine.").unwrap_or("") {

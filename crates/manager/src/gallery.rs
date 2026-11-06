@@ -412,6 +412,15 @@ impl Widget for Gallery {
                     _ => {}
                 }
             }
+            // Right-click a tile: its menu (Remix), shown by the tray window once this returns.
+            Event::RightClick { x, y } => {
+                if let Some(Hit::Tile(i)) = self.hit_at(x, y) {
+                    let e = self.entries.borrow()[i].clone();
+                    if e.dir.join("widget.toml").is_file() {
+                        crate::tile_menu(e);
+                    }
+                }
+            }
             Event::Wheel { delta, .. } => {
                 if delta > 0.0 && self.first > 0 {
                     self.first -= 1;

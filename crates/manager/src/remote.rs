@@ -28,6 +28,7 @@ fn foreign(dir: &Path) -> bool {
 
 /// Widget `id` of package `package` in `dir` is on the desktop now.
 pub fn add(id: &str, package: &str, dir: &Path) {
+    let package = crate::remix::original(package);
     if !foreign(dir) {
         return;
     }

@@ -13,6 +13,7 @@ mod events;
 mod feeds;
 mod gallery;
 mod install;
+mod remix;
 mod store;
 mod log;
 mod shell;
@@ -44,6 +45,8 @@ thread_local! {
     static HIDDEN: Cell<bool> = const { Cell::new(false) };
     /// The tray menu offers "What's new" (this version is new on this PC).
     static WHATS_NEW: Cell<bool> = const { Cell::new(false) };
+    /// The gallery tile whose menu is about to show.
+    static TILE: std::cell::RefCell<Option<Entry>> = const { std::cell::RefCell::new(None) };
     static TRAY: Cell<HWND> = const { Cell::new(HWND(std::ptr::null_mut())) };
 }
 
@@ -410,8 +413,35 @@ fn tray_menu() -> Vec<MenuItem> {
     items
 }
 
+/// From the gallery: shows `entry`'s menu after the gallery's event is done (menus block).
+pub(crate) fn tile_menu(entry: Entry) {
+    TILE.set(Some(entry));
+    let _ = unsafe { PostMessageW(Some(TRAY.get()), shell::WM_APP_TILE_MENU, WPARAM(0), LPARAM(0)) };
+}
+
+fn show_tile_menu() {
+    let Some(entry) = TILE.take() else { return };
+    let mut pt = POINT::default();
+    let _ = unsafe { windows::Win32::UI::WindowsAndMessaging::GetCursorPos(&mut pt) };
+    if widgine::popup_menu(pt.x, pt.y, &[MenuItem::new(tr("Remix"), "remix")]).as_deref() == Some("remix") {
+        match remix::remix(&entry.dir) {
+            Ok(layout) => {
+                let _ = std::process::Command::new("notepad.exe").arg(&layout).spawn();
+                if let Some(dir) = layout.parent() {
+                    feeds::open(&dir.display().to_string());
+                }
+                start_scan();
+            }
+            Err(e) => {
+                message(&format!("{}\n\n{e}", tr("Remix")), MB_OK | MB_ICONWARNING);
+            }
+        }
+    }
+}
+
 fn request(r: shell::Request) {
     match r {
+        shell::Request::TileMenu => show_tile_menu(),
         shell::Request::Gallery => open_gallery(),
         shell::Request::Scanned => scanned(),
         shell::Request::Remote(from, fields) => remote::message(from, &fields),
