@@ -86,12 +86,11 @@ impl Gallery {
         Self { entries, add, selected: 0, first: 0, hover: None, press: None, hits: Vec::new(), base: None, at_end: true, query: String::new() }
     }
 
-    /// The sidebar row of an entry: its group and category. Installed widgets share one row;
-    /// store widgets have none (they are under the Community button).
+    /// The sidebar row of an entry: its group and category. Store widgets have none (they are
+    /// under the Community button).
     fn row_of(e: &Entry) -> Option<(Kind, String)> {
         match e.kind {
             Kind::Community => None,
-            Kind::Installed => Some((Kind::Installed, widgine::tr("Installed").into())),
             k => Some((k, e.category())),
         }
     }
@@ -244,16 +243,16 @@ impl Gallery {
             let (sl, st, sr, sb) = SEARCH;
             let a = if hover == Some(Hit::Search) { 0.1 } else { 0.065 };
             pill(sl, st, sr, sb, (sb - st) / 2.0, fill(a))?;
-            let (mx, my) = (sl + 14.0, (st + sb) / 2.0);
+            let (mx, my) = (37.0, (st + sb) / 2.0);
             let round = D2D1_STROKE_STYLE_PROPERTIES1 { startCap: D2D1_CAP_STYLE_ROUND, endCap: D2D1_CAP_STYLE_ROUND, ..Default::default() };
             let stroke = d2d.CreateStrokeStyle(&round, None)?;
             let glass = brush(ink(0.5))?;
             ctx.DrawEllipse(&D2D1_ELLIPSE { point: Vector2 { X: mx - 1.0, Y: my - 1.0 }, radiusX: 4.6, radiusY: 4.6 }, &glass, 1.5, &stroke);
             ctx.DrawLine(Vector2 { X: mx + 2.6, Y: my + 2.6 }, Vector2 { X: mx + 5.8, Y: my + 5.8 }, &glass, 1.5, &stroke);
-            let tx = sl + 26.0;
+            let tx = 54.0;
             let tr_ = if self.query.is_empty() { sr - 10.0 } else { sr - 26.0 };
             if self.query.is_empty() {
-                text(widgine::tr("Search"), &hint, tx + 4.0, st, tr_, sb, ink(0.42))?;
+                text(widgine::tr("Search"), &hint, tx, st, tr_, sb, ink(0.42))?;
             } else {
                 text(&self.query, &hint, tx, st, tr_, sb, fg)?;
                 // The clear button.
@@ -289,9 +288,6 @@ impl Gallery {
             let (tops, captions, row) = Self::sidebar(&cats);
             for (t, label) in &captions {
                 let h = row / ROW * CAPTION;
-                if label.is_empty() {
-                    ctx.FillRectangle(&rect(26.0, *t + h / 2.0, SIDE - 26.0, *t + h / 2.0 + 1.0), &brush(ink(0.1))?);
-                }
                 text(label, &small, 26.0, *t + h - 22.0, SIDE - 26.0, *t + h - 4.0, ink(0.45))?;
             }
             let rows = std::iter::once((widgine::tr("All widgets").to_string(), total)).chain(cats.iter().map(|(_, c, n)| (c.clone(), *n)));
@@ -586,14 +582,6 @@ unsafe fn category_icon(ctx: &ID2D1DeviceContext, d2d: &ID2D1Factory1, category:
             sink.Close()?;
             ctx.DrawGeometry(&arc, b, w, &stroke);
             ctx.DrawRoundedRectangle(&round(-7.0, 0.5, 7.5, 7.0, 3.25), b, w, &stroke);
-        } else if category == tr("Installed") {
-            // An arrow into a tray.
-            ctx.DrawLine(p(0.0, -7.0), p(0.0, 2.5), b, w, &stroke);
-            ctx.DrawLine(p(-3.5, -1.0), p(0.0, 2.5), b, w, &stroke);
-            ctx.DrawLine(p(3.5, -1.0), p(0.0, 2.5), b, w, &stroke);
-            ctx.DrawLine(p(-7.0, 2.5), p(-7.0, 6.5), b, w, &stroke);
-            ctx.DrawLine(p(-7.0, 6.5), p(7.0, 6.5), b, w, &stroke);
-            ctx.DrawLine(p(7.0, 6.5), p(7.0, 2.5), b, w, &stroke);
         } else if category == tr("Community") {
             // A globe.
             ctx.DrawEllipse(&dot(0.0, 0.0, 7.2), b, w, &stroke);
@@ -614,8 +602,7 @@ unsafe fn category_icon(ctx: &ID2D1DeviceContext, d2d: &ID2D1Factory1, category:
 
 fn group_label(kind: Kind) -> &'static str {
     match kind {
-        // A divider, no caption: the row says "Installed".
-        Kind::Installed => "",
+        Kind::Installed => widgine::tr("Installed"),
         Kind::Featured => widgine::tr("Featured"),
         Kind::Builtin => widgine::tr("Built-in"),
         Kind::App => widgine::tr("Other apps"),
@@ -639,8 +626,9 @@ mod tests {
         let entries = Rc::new(RefCell::new(vec![entry(Kind::Builtin), entry(Kind::Installed), entry(Kind::Installed), entry(Kind::Community)]));
         let mut g = Gallery::new(entries, Rc::new(|_: &Entry, _: bool| {}));
         let rows = g.categories();
+        // Installed widgets: a group of their own, by category, like the built-in ones.
         assert_eq!(rows.len(), 2, "{rows:?}");
-        assert_eq!((rows[1].0, rows[1].1.as_str(), rows[1].2), (Kind::Installed, widgine::tr("Installed"), 2));
+        assert_eq!((rows[1].0, rows[1].1.as_str(), rows[1].2), (Kind::Installed, rows[0].1.as_str(), 2));
         // All widgets: the built-in and both installed ones, not the store's.
         let count = |lines: &[Line]| lines.iter().map(|l| if let Line::Tiles(t) = l { t.len() } else { 0 }).sum::<usize>();
         assert_eq!(count(&g.lines()), 3);

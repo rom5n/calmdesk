@@ -72,7 +72,7 @@ A "Community" group in the gallery, listing packages from a public index.
 - **Gallery:** a Community button at the bottom of the sidebar opens the store's list on the
   right (scrolls, grouped by category, most downloaded first, search works inside it).
   Widgets the user installed into `%LOCALAPPDATA%\Widgets` (store, `.cdwidget`, remixes) have
-  their own "Installed" row; right-click one to delete it (its folder goes to the Recycle Bin,
+  their own "Installed" group, by category, like "Built-in"; right-click one to delete it (its folder goes to the Recycle Bin,
   its widgets leave the desktop). The other rows are grouped under "Built-in" and "Other apps".
   Clicking or dragging a store tile installs it, then adds it like any widget. The index is
   fetched at most once an hour.
