@@ -95,22 +95,28 @@ impl Gallery {
         cats
     }
 
-    /// Top of each sidebar row ("All widgets", then `cats`) and the group captions (top, label).
-    /// No captions while every widget is built-in.
-    fn sidebar(cats: &[(Kind, String, usize)]) -> (Vec<f32>, Vec<(f32, &'static str)>) {
+    /// Top of each sidebar row ("All widgets", then `cats`), the group captions (top, label),
+    /// and the row height. No captions while every widget is built-in. Rows get shorter when
+    /// they would not fit.
+    // ponytail: shrinks instead of scrolling; add sidebar scrolling if rows get too thin.
+    fn sidebar(cats: &[(Kind, String, usize)]) -> (Vec<f32>, Vec<(f32, &'static str)>, f32) {
         let grouped = cats.iter().any(|c| c.0 != Kind::Builtin);
+        let groups = if grouped { cats.windows(2).filter(|w| w[0].0 != w[1].0).count() + 1 } else { 0 };
+        let need = (cats.len() + 1) as f32 * ROW + groups as f32 * CAPTION;
+        let k = ((BOTTOM - LIST_TOP) / need).min(1.0);
+        let (row, caption) = (ROW * k, CAPTION * k);
         let mut tops = vec![LIST_TOP];
         let mut captions = Vec::new();
-        let mut y = LIST_TOP + ROW;
+        let mut y = LIST_TOP + row;
         for (i, (kind, ..)) in cats.iter().enumerate() {
             if grouped && (i == 0 || cats[i - 1].0 != *kind) {
                 captions.push((y, group_label(*kind)));
-                y += CAPTION;
+                y += caption;
             }
             tops.push(y);
-            y += ROW;
+            y += row;
         }
-        (tops, captions)
+        (tops, captions, row)
     }
 
     /// Shown by the search: the name, category, variant or source contains the query.
@@ -227,30 +233,32 @@ impl Gallery {
             layout.GetMetrics(&mut m)?;
             let cx = (tx + m.widthIncludingTrailingWhitespace + 1.0).min(tr_);
             ctx.FillRectangle(&rect(cx, my - 8.0, cx + 1.4, my + 8.0), &brush(theme.accent)?);
-            let total = entries.len();
-            let (tops, captions) = Self::sidebar(&cats);
+            // Featured widgets are copies: count each widget once.
+            let total = entries.iter().filter(|e| e.kind != Kind::Featured).count();
+            let (tops, captions, row) = Self::sidebar(&cats);
             for (t, label) in &captions {
-                text(label, &small, 26.0, *t + 6.0, SIDE - 26.0, *t + CAPTION - 4.0, ink(0.45))?;
+                let h = row / ROW * CAPTION;
+                text(label, &small, 26.0, *t + h - 22.0, SIDE - 26.0, *t + h - 4.0, ink(0.45))?;
             }
             let rows = std::iter::once((widgine::tr("All widgets").to_string(), total)).chain(cats.iter().map(|(_, c, n)| (c.clone(), *n)));
             for (k, (label, n)) in rows.enumerate() {
                 let t = tops[k];
                 let selected = k == self.selected;
                 if selected {
-                    pill(14.0, t, SIDE - 14.0, t + ROW - 2.0, 10.0, theme.accent)?;
+                    pill(14.0, t, SIDE - 14.0, t + row - 2.0, 10.0, theme.accent)?;
                 } else if hover == Some(Hit::Category(k)) {
-                    pill(14.0, t, SIDE - 14.0, t + ROW - 2.0, 10.0, fill(0.08))?;
+                    pill(14.0, t, SIDE - 14.0, t + row - 2.0, 10.0, fill(0.08))?;
                 }
                 let c = if selected { rgba(1.0, 1.0, 1.0, 1.0) } else { fg };
                 let c2 = if selected { rgba(1.0, 1.0, 1.0, 0.8) } else { ink(0.45) };
-                category_icon(ctx, &d2d, if k == 0 { "" } else { &label }, 37.0, t + (ROW - 2.0) / 2.0, &brush(c)?)?;
-                text(&label, &body, 54.0, t, SIDE - 52.0, t + ROW - 2.0, c)?;
-                text(&n.to_string(), &count, SIDE - 60.0, t, SIDE - 26.0, t + ROW - 2.0, c2)?;
+                category_icon(ctx, &d2d, if k == 0 { "" } else { &label }, 37.0, t + (row - 2.0) / 2.0, &brush(c)?)?;
+                text(&label, &body, 54.0, t, SIDE - 52.0, t + row - 2.0, c)?;
+                text(&n.to_string(), &count, SIDE - 60.0, t, SIDE - 26.0, t + row - 2.0, c2)?;
                 // A short hairline under the label, not next to a highlighted row.
                 let lit = |r: usize| r == self.selected || hover == Some(Hit::Category(r));
-                let last_of_group = k < cats.len() && tops[k + 1] > t + ROW;
+                let last_of_group = k < cats.len() && tops[k + 1] > t + row + 0.5;
                 if k < cats.len() && !last_of_group && !lit(k) && !lit(k + 1) {
-                    ctx.FillRectangle(&rect(54.0, t + ROW - 1.5, SIDE - 26.0, t + ROW - 0.5), &brush(ink(0.08))?);
+                    ctx.FillRectangle(&rect(54.0, t + row - 1.5, SIDE - 26.0, t + row - 0.5), &brush(ink(0.08))?);
                 }
             }
 
@@ -288,7 +296,8 @@ impl Gallery {
                             let e = &entries[i];
                             text(&e.info.name, &name, x + 14.0, y + TILE_H - 44.0, x + tw - 12.0, y + TILE_H - 24.0, fg)?;
                             // The variant tells similar tiles apart; else where it comes from.
-                            let sub = if e.info.variant.is_empty() { &e.source } else { &e.info.variant };
+                            // Store widgets show their author and downloads instead.
+                            let sub = if e.info.variant.is_empty() || e.store.is_some() { &e.source } else { &e.info.variant };
                             text(sub, &small, x + 14.0, y + TILE_H - 26.0, x + tw - 12.0, y + TILE_H - 10.0, ink(0.5))?;
                         }
                     }
@@ -321,7 +330,8 @@ impl Widget for Gallery {
         let cats = self.categories();
         self.selected = self.selected.min(cats.len());
         // Hit areas and previews of what is visible.
-        self.hits = Self::sidebar(&cats).0.into_iter().enumerate().map(|(k, t)| (rect(14.0, t, SIDE - 14.0, t + ROW - 2.0), Hit::Category(k))).collect();
+        let (tops, _, row) = Self::sidebar(&cats);
+        self.hits = tops.into_iter().enumerate().map(|(k, t)| (rect(14.0, t, SIDE - 14.0, t + row - 2.0), Hit::Category(k))).collect();
         let (sl, st, sr, sb) = SEARCH;
         if !self.query.is_empty() {
             self.hits.push((rect(sr - 24.0, st, sr, sb), Hit::Clear));
@@ -513,6 +523,7 @@ unsafe fn category_icon(ctx: &ID2D1DeviceContext, d2d: &ID2D1Factory1, category:
 
 fn group_label(kind: Kind) -> &'static str {
     match kind {
+        Kind::Featured => widgine::tr("Featured"),
         Kind::Builtin => widgine::tr("Built-in"),
         Kind::App => widgine::tr("Other apps"),
         Kind::Community => widgine::tr("Community"),

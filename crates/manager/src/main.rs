@@ -42,13 +42,15 @@ thread_local! {
     /// Widgets on the desktop: (instance id, package dir), saved across runs.
     static INSTANCES: RefCell<Vec<(String, PathBuf)>> = const { RefCell::new(Vec::new()) };
     static HIDDEN: Cell<bool> = const { Cell::new(false) };
+    /// The tray menu offers "What's new" (this version is new on this PC).
+    static WHATS_NEW: Cell<bool> = const { Cell::new(false) };
     static TRAY: Cell<HWND> = const { Cell::new(HWND(std::ptr::null_mut())) };
 }
 
 /// Packages found by the background scan, for the UI thread.
 static SCANNED: Mutex<Option<Vec<PathBuf>>> = Mutex::new(None);
 /// The store index.
-static STORE: Mutex<Vec<store::Item>> = Mutex::new(Vec::new());
+static STORE: Mutex<(Vec<store::Item>, Vec<store::Shelf>)> = Mutex::new((Vec::new(), Vec::new()));
 /// The tray window, for threads that post to it.
 static TRAY_HWND: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
 
@@ -300,7 +302,8 @@ fn start_scan() {
 
 fn scanned() {
     let Some(found) = SCANNED.lock().unwrap().clone() else { return };
-    let entries = catalog::merge(catalog::builtins(), found, STORE.lock().unwrap().clone());
+    let (items, shelves) = STORE.lock().unwrap().clone();
+    let entries = catalog::merge(catalog::builtins(), found, items, &shelves);
     // A store package that finished downloading changes only whether its folder exists.
     let key = |x: &Entry| (x.dir.clone(), x.dir.is_dir());
     let changed = ENTRIES.with(|e| {
@@ -340,6 +343,9 @@ fn tray_menu() -> Vec<MenuItem> {
     items.push(MenuItem::submenu(tr("Settings"), settings));
     if let Some((version, _)) = update::available() {
         items.push(MenuItem::new(&format!("{} ({version})", tr("Update available")), "update"));
+    }
+    if WHATS_NEW.get() {
+        items.push(MenuItem::new(&format!("{} {}", tr("What's new in"), env!("CARGO_PKG_VERSION")), "whats-new"));
     }
     items.push(MenuItem::new(tr("Quit"), "quit"));
     items
@@ -389,6 +395,10 @@ fn request(r: shell::Request) {
                 if let Some((_, url)) = update::available() {
                     feeds::open(&url);
                 }
+            }
+            "whats-new" => {
+                WHATS_NEW.set(false);
+                feeds::open(concat!("https://github.com/rom5n/calmdesk/releases/tag/v", env!("CARGO_PKG_VERSION")));
             }
             "quit" => unsafe { PostQuitMessage(0) },
             a => {
@@ -516,6 +526,13 @@ fn main() -> windows::core::Result<()> {
     // Screen time counts whether or not its widget is on the desktop.
     feeds::start();
     update::start();
+    // Updated since the last start: the tray offers the release notes until they are opened.
+    let seen = setting("version");
+    if seen.as_deref() != Some(env!("CARGO_PKG_VERSION")) {
+        // ponytail: also shows after updating from 0.1, which never saved a version.
+        WHATS_NEW.set(seen.is_some() || !INSTANCES.with_borrow(|v| v.is_empty()));
+        set_setting("version", env!("CARGO_PKG_VERSION"));
+    }
 
     let tray = shell::create_tray(request, tray_menu)?;
     TRAY.set(tray);

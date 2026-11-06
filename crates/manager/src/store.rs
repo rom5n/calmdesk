@@ -1,7 +1,7 @@
 //! Community widgets from the store index (github.com/rom5n/calmdesk-widgets). The index is a
 //! text file: "#" comment lines, then one package per line with tab-separated id, sha256,
-//! download url, version, author, category and name. Its CI builds it from the reviewed
-//! packages.
+//! download url, version, author, category, name and download count. Its CI builds it from the
+//! reviewed packages. `featured.txt` next to it lists the Featured shelves.
 //!
 //! The gallery lists every package from the index alone. A package is downloaded only when its
 //! tile is shown (for the live preview) or picked, and unpacked into
@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
 
-const INDEX: &str = "https://github.com/rom5n/calmdesk-widgets/releases/download/packages/index.txt";
+const RELEASE: &str = "https://github.com/rom5n/calmdesk-widgets/releases/download/packages/";
 /// The same limit as `install.rs` has for a .cdwidget.
 const MAX_FILE: &str = "20971520";
 const DAY: Duration = Duration::from_secs(24 * 60 * 60);
@@ -27,6 +27,14 @@ pub struct Item {
     pub author: String,
     pub category: String,
     pub name: String,
+    pub downloads: u64,
+}
+
+/// A Featured shelf showing today: its title and package ids.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Shelf {
+    pub title: String,
+    pub ids: Vec<String>,
 }
 
 impl Item {
@@ -48,19 +56,26 @@ fn dir() -> PathBuf {
     crate::data_dir().join("store")
 }
 
-/// Fetches the index at most once a day and deletes downloads that left the index or were not
-/// used for a month. Offline: the index fetched before. Slow: call it off the UI thread.
-pub fn refresh() -> Vec<Item> {
+/// Fetches the index and the shelves at most once a day and deletes downloads that left the
+/// index or were not used for a month. Offline: what was fetched before. Slow: call it off the
+/// UI thread.
+pub fn refresh() -> (Vec<Item>, Vec<Shelf>) {
     let dir = dir();
     let index = dir.join("index.txt");
+    let featured = dir.join("featured.txt");
     if age(&index) >= DAY {
-        let complete = |t: &String| parse(t).count() == t.lines().filter(|l| !l.trim().is_empty() && !l.starts_with('#')).count() && t.starts_with('#');
-        if let Some(text) = crate::feeds::curl(INDEX).filter(complete) {
-            let _ = std::fs::create_dir_all(&dir);
+        let content = |t: &str| t.lines().filter(|l| !l.trim().is_empty() && !l.starts_with('#')).count();
+        let _ = std::fs::create_dir_all(&dir);
+        // Only whole files: a "Not Found" page is no index.
+        if let Some(text) = crate::feeds::curl(&format!("{RELEASE}index.txt")).filter(|t| t.starts_with('#') && parse(t).count() == content(t)) {
             let _ = std::fs::write(&index, text);
+        }
+        if let Some(text) = crate::feeds::curl(&format!("{RELEASE}featured.txt")).filter(|t| t.starts_with('#')) {
+            let _ = std::fs::write(&featured, text);
         }
     }
     let items: Vec<Item> = parse(&std::fs::read_to_string(&index).unwrap_or_default()).collect();
+    let shelves = shelves(&std::fs::read_to_string(&featured).unwrap_or_default(), &today());
     for d in [dir.join("files"), dir.join("packages")] {
         for e in std::fs::read_dir(d).into_iter().flatten().flatten() {
             let name = e.file_name().to_string_lossy().into_owned();
@@ -70,7 +85,26 @@ pub fn refresh() -> Vec<Item> {
             }
         }
     }
-    items
+    (items, shelves)
+}
+
+/// "2026-11-06", local time.
+fn today() -> String {
+    let t = unsafe { windows::Win32::System::SystemInformation::GetLocalTime() };
+    format!("{:04}-{:02}-{:02}", t.wYear, t.wMonth, t.wDay)
+}
+
+/// The shelves of featured.txt (title, first day, last day, ids) whose days include `today`.
+fn shelves(text: &str, today: &str) -> Vec<Shelf> {
+    text.lines()
+        .filter(|l| !l.starts_with('#'))
+        .filter_map(|l| {
+            let f: Vec<&str> = l.trim_end_matches('\r').split('\t').collect();
+            let [title, from, to, ids] = f[..] else { return None };
+            // ISO dates compare as text.
+            (from <= today && today <= to).then(|| Shelf { title: title.into(), ids: ids.split(',').map(|i| i.trim().to_string()).collect() })
+        })
+        .collect()
 }
 
 /// Time since `path` was written; very long when it is missing.
@@ -82,10 +116,11 @@ fn age(path: &Path) -> Duration {
 fn parse(text: &str) -> impl Iterator<Item = Item> + '_ {
     text.lines().filter(|l| !l.starts_with('#')).filter_map(|l| {
         let f: Vec<&str> = l.trim_end_matches('\r').split('\t').collect();
-        let [id, sha, url, version, author, category, name] = f[..] else { return None };
+        // Indexes from before the download count have 7 fields.
+        let (&[id, sha, url, version, author, category, name], downloads) = (f.get(..7)?, f.get(7)) else { return None };
         let ok = !id.is_empty() && sha.len() == 64 && sha.bytes().all(|b| b.is_ascii_hexdigit()) && url.starts_with("https://");
         let s = |x: &str| x.to_string();
-        ok.then(|| Item { id: s(id), sha: sha.to_ascii_lowercase(), url: s(url), version: s(version), author: s(author), category: s(category), name: s(name) })
+        ok.then(|| Item { id: s(id), sha: sha.to_ascii_lowercase(), url: s(url), version: s(version), author: s(author), category: s(category), name: s(name), downloads: downloads.and_then(|d| d.parse().ok()).unwrap_or(0) })
     })
 }
 
@@ -175,9 +210,12 @@ mod tests {
     #[test]
     fn index_lines() {
         let sha = "a".repeat(64);
-        let text = format!("# index\ncom.a.b\t{sha}\thttps://x/y.cdwidget\t1.0\tMe\tTime\tBig Clock\nbad line\ncom.c\tshort\thttps://x\t1\ta\tb\tc\n\n");
+        let text = format!("# index\ncom.a.b\t{sha}\thttps://x/y.cdwidget\t1.0\tMe\tTime\tBig Clock\t42\nbad line\ncom.c\tshort\thttps://x\t1\ta\tb\tc\n\n");
         let got: Vec<_> = super::parse(&text).collect();
         assert_eq!(got.len(), 1);
+        assert_eq!(got[0].downloads, 42);
+        let shelves = super::shelves("# x\nWeek\t2026-11-01\t2026-11-07\ta.b, c.d\nOld\t2025-01-01\t2025-01-02\te\n", "2026-11-06");
+        assert_eq!(shelves, vec![super::Shelf { title: "Week".into(), ids: vec!["a.b".into(), "c.d".into()] }]);
         assert_eq!((got[0].id.as_str(), got[0].name.as_str(), got[0].version.as_str()), ("com.a.b", "Big Clock", "1.0"));
         let file = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("Cargo.toml");
         assert_eq!(super::sha256(&file).map(|h| h.len()), Some(64));
@@ -190,7 +228,7 @@ mod tests {
         let _ = std::fs::remove_dir_all(&root);
         let src = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../widgets/clock");
         let id = widgine::package_info(&src).unwrap().id;
-        let item = |id: &str| super::Item { id: id.into(), sha: "c".repeat(64), url: "https://x".into(), version: "1".into(), author: "a".into(), category: "Time".into(), name: "n".into() };
+        let item = |id: &str| super::Item { id: id.into(), sha: "c".repeat(64), url: "https://x".into(), version: "1".into(), author: "a".into(), category: "Time".into(), name: "n".into(), downloads: 0 };
         let file = item(&id).file_in(&root);
         std::fs::create_dir_all(file.parent().unwrap()).unwrap();
         let ok = std::process::Command::new("tar.exe").args(["--format", "zip", "-cf"]).arg(&file).arg("-C").arg(&src).arg(".").status().unwrap().success();

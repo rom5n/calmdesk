@@ -33,6 +33,8 @@ pub struct Entry {
 /// The gallery groups widgets by where they come from, in this order.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Kind {
+    /// A copy of another entry, shown on a Featured shelf.
+    Featured,
     Builtin,
     App,
     Community,
@@ -107,8 +109,9 @@ pub fn scan() -> Vec<PathBuf> {
 
 /// Built-ins first, then the scanned packages that load, without duplicates (same directory
 /// or same package id), then store packages that are not installed or are newer than the
-/// installed one. Sorted by name.
-pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<crate::store::Item>) -> Vec<Entry> {
+/// installed one. Sorted by name; store packages by downloads. Then copies of the widgets on
+/// today's Featured shelves, the shelf title as their category.
+pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<crate::store::Item>, shelves: &[crate::store::Shelf]) -> Vec<Entry> {
     let canon = |p: &Path| std::fs::canonicalize(p).unwrap_or_else(|_| p.to_path_buf());
     let mut seen_dirs: HashSet<PathBuf> = builtins.iter().map(|e| canon(&e.dir)).collect();
     let mut seen_ids: HashSet<String> = builtins.iter().map(|e| e.info.id.clone()).collect();
@@ -119,7 +122,7 @@ pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<crate::stor
         }
         match package_info(&dir) {
             Ok(info) if seen_ids.insert(info.id.clone()) => {
-                let source = app_folder(&dir);
+                let source = if info.author.is_empty() { app_folder(&dir) } else { info.author.clone() };
                 all.push(Entry { dir, info, source, kind: Kind::App, store: None });
             }
             Ok(_) => {}
@@ -146,13 +149,32 @@ pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<crate::stor
         let source = match all.iter().find(|e| e.info.id == info.id) {
             Some(e) if !crate::update::newer(&info.version, &e.info.version) => continue,
             Some(_) => widgine::tr("Update available").into(),
-            None if info.author.is_empty() => widgine::tr("Community").into(),
-            None => info.author.clone(),
+            None if item.author.is_empty() => format!("↓{}", short(item.downloads)),
+            None => format!("{} · ↓{}", item.author, short(item.downloads)),
         };
         all.push(Entry { dir, info, source, kind: Kind::Community, store: Some(item) });
     }
-    all.sort_by_key(|e| e.info.name.to_lowercase());
+    let downloads = |e: &Entry| e.store.as_ref().map_or(0, |i| i.downloads);
+    all.sort_by_key(|e| (std::cmp::Reverse(downloads(e)), e.info.name.to_lowercase()));
+    for shelf in shelves {
+        for id in &shelf.ids {
+            // The installed widget when there is one, else the store's.
+            let found = all.iter().filter(|e| e.kind != Kind::Featured && e.info.id == *id).min_by_key(|e| e.kind == Kind::Community);
+            if let Some(e) = found.cloned() {
+                all.push(Entry { kind: Kind::Featured, info: widgine::PackageInfo { category: shelf.title.clone(), ..e.info.clone() }, ..e });
+            }
+        }
+    }
     all
+}
+
+/// 1234 -> "1.2K".
+fn short(n: u64) -> String {
+    match n {
+        0..1000 => n.to_string(),
+        1000..1_000_000 => format!("{:.1}K", n as f64 / 1e3).replace(".0K", "K"),
+        _ => format!("{:.1}M", n as f64 / 1e6).replace(".0M", "M"),
+    }
 }
 
 /// Folders that never hold widget packages, or are huge.
@@ -260,6 +282,11 @@ fn app_folder(dir: &Path) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn short_numbers() {
+        assert_eq!((short(999), short(1000), short(1234), short(2_500_000)), ("999".into(), "1K".into(), "1.2K".into(), "2.5M".into()));
+    }
 
     #[test]
     fn folder_names() {
