@@ -4,6 +4,7 @@
 //!
 //! Run: cargo run -p calmdesk --release
 //! `--background`: start without opening the gallery (sign-in). `--uninstall`: Settings > Apps.
+//! `--install <file.cdwidget>`: a double-clicked widget file (see `install`).
 
 #![windows_subsystem = "windows"]
 
@@ -11,6 +12,7 @@ mod catalog;
 mod events;
 mod feeds;
 mod gallery;
+mod install;
 mod log;
 mod shell;
 mod remote;
@@ -363,6 +365,27 @@ fn request(r: shell::Request) {
     }
 }
 
+/// `--install`: asks, then installs. True when the widget was installed.
+fn install_file(file: &Path) -> bool {
+    let ask = |info: &widgine::PackageInfo, replacing: bool| {
+        let q = if replacing { tr("Update this widget? The installed version is replaced.") } else { tr("Install this widget?") };
+        message(&format!("{q}
+
+{}", info.name), MB_YESNO | MB_ICONQUESTION) == IDYES
+    };
+    match install::install(file, ask) {
+        Ok(done) => done.is_some(),
+        Err(e) => {
+            eprintln!("calmdesk: install {}: {e}", file.display());
+            message(&format!("{}
+{}
+
+{e}", tr("Installation failed:"), file.display()), MB_OK | MB_ICONWARNING);
+            false
+        }
+    }
+}
+
 fn on_action(id: &str, action: &str) {
     if action == "delete" {
         INSTANCES.with_borrow_mut(|v| v.retain(|(i, _)| i != id));
@@ -386,6 +409,16 @@ fn main() -> windows::core::Result<()> {
     if args.iter().any(|a| a == "--uninstall") {
         shell::uninstall();
         return Ok(());
+    }
+    // Before any text is looked up: the engine reads the language once.
+    if let Some(lang) = setting("lang").filter(|l| !l.is_empty()) {
+        unsafe { std::env::set_var("WIDGET_LANG", lang) };
+    }
+    // Then the gallery opens, in this instance or the running one, and finds the new widget.
+    if let Some(file) = args.iter().position(|a| a == "--install").and_then(|i| args.get(i + 1)) {
+        if !install_file(Path::new(file)) {
+            return Ok(());
+        }
     }
     let background = args.iter().any(|a| a == "--background");
     // One instance per data folder. Starting it again (Start menu) opens the running one's gallery.
@@ -411,10 +444,6 @@ fn main() -> windows::core::Result<()> {
         if let Err(e) = copy_data(&backup_dir(), &data_dir()) {
             eprintln!("calmdesk: import from {}: {e}", backup_dir().display());
         }
-    }
-    // Before any text is looked up: the engine reads the language once.
-    if let Some(lang) = setting("lang").filter(|l| !l.is_empty()) {
-        unsafe { std::env::set_var("WIDGET_LANG", lang) };
     }
     if setting("fullscreen").as_deref() == Some("show") {
         widgine::set_fullscreen_hiding(false);

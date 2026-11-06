@@ -183,6 +183,10 @@ pub fn uninstall() {
     set_autostart(false);
     unsafe {
         let _ = RegDeleteTreeW(HKEY_CURRENT_USER, &HSTRING::from(UNINSTALL_KEY));
+        // The .cdwidget file type the installer registered.
+        let _ = RegDeleteTreeW(HKEY_CURRENT_USER, w!(r"Software\Classes\.cdwidget"));
+        let _ = RegDeleteTreeW(HKEY_CURRENT_USER, w!(r"Software\Classes\Calmdesk.Widget"));
+        SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, None, None);
     }
     if let Some(appdata) = std::env::var_os("APPDATA") {
         let _ = std::fs::remove_file(PathBuf::from(appdata).join(r"Microsoft\Windows\Start Menu\Programs").join(format!("{APP_NAME}.lnk")));

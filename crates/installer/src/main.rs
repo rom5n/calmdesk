@@ -107,6 +107,12 @@ fn install() -> std::result::Result<(), String> {
         reg_dword(UNINSTALL_KEY, name, 1)?;
     }
     reg(RUN_KEY, APP, &format!("{quoted} --background"))?;
+    // Double-clicking a .cdwidget file installs the widget in it.
+    reg(r"Software\Classes\.cdwidget", "", "Calmdesk.Widget")?;
+    reg(r"Software\Classes\Calmdesk.Widget", "", "Calmdesk widget")?;
+    reg(r"Software\Classes\Calmdesk.Widget\DefaultIcon", "", &format!("{quoted},0"))?;
+    reg(r"Software\Classes\Calmdesk.Widget\shell\open\command", "", &format!("{quoted} --install \"%1\""))?;
+    unsafe { windows::Win32::UI::Shell::SHChangeNotify(windows::Win32::UI::Shell::SHCNE_ASSOCCHANGED, windows::Win32::UI::Shell::SHCNF_IDLIST, None, None) };
     hidden(&exe, &["--background"]).spawn().map_err(|e| format!("{}: {e}", exe.display()))?;
     Ok(())
 }

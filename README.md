@@ -94,9 +94,10 @@ with the same look and the same settings menu as every other widget.
    in with the built-in widgets.
 3. Feed live values from your app with `widgine::host` (Rust) or `we_host_set` (C);
    Calmdesk shows the widget in its own process and passes clicks back to your app.
-4. Install it to `%LOCALAPPDATA%\Widgets\<package>`, `%ProgramData%\Widgets\<package>`, or
-   register its folder under `HKCU\Software\Widgine\Packages`. Calmdesk finds it the next
-   time the gallery opens.
+4. Share it as a `.cdwidget` file (`widget-dev pack <package-dir>`): users double-click it
+   and Calmdesk installs it. Or install it from your app to `%LOCALAPPDATA%\Widgets\<package>`
+   or `%ProgramData%\Widgets\<package>`, or register its folder under
+   `HKCU\Software\Widgine\Packages`. Calmdesk finds it the next time the gallery opens.
 
 Details: [Getting into the Calmdesk gallery](https://github.com/rom5n/widgine/blob/main/docs/authoring.md#getting-into-the-calmdesk-gallery)
 and [Publishing a package](https://github.com/rom5n/widgine/blob/main/docs/authoring.md#publishing-a-package).

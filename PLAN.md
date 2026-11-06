@@ -88,7 +88,7 @@ Risks: GitHub raw/API rate limits (cache, one fetch a day, raw URLs instead of t
 malicious packages (declarative only, size cap on download and on extracted files, extraction
 into a temp folder with path checks, `sha256` from the index).
 
-### 2. `.cdwidget` files, double-click to install
+### 2. `.cdwidget` files, double-click to install (done)
 
 A `.cdwidget` is a zip of the package folder.
 
@@ -97,10 +97,10 @@ A `.cdwidget` is a zip of the package folder.
   `calmdesk.exe --install "%1"`). Uninstall removes it.
 - **Manager:** `main.rs` handles `--install <file>`: forwards it to the running instance
   (same path as the existing single-instance handling) or starts and installs. Shared install
-  code in `store.rs`: extract to temp, reject entries with `..` or absolute paths, validate,
+  code in `install.rs` (the store reuses it): extract to temp, reject entries with `..` or absolute paths, validate,
   confirm with a small dialog ("Install Weather by Name?"), move into
   `%LOCALAPPDATA%\Widgets\<id>`, then open the gallery on the new widget.
-- **Dropping:** dropping a `.cdwidget` on the gallery installs it too.
+- **Dropping:** dropping a `.cdwidget` on the gallery installs it too. (Not done yet: needs drag-and-drop in engine panels.)
 - **Authors:** `widget-dev pack <dir>` (engine repo) writes `<id>-<version>.cdwidget`.
 - **Docs:** README "For widget authors" and engine `docs/guide.md` step 8 mention `.cdwidget`.
 
