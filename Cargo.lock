@@ -7,7 +7,7 @@ name = "calmdesk"
 version = "0.1.0"
 dependencies = [
  "media",
- "widget-engine",
+ "widgine",
  "windows",
 ]
 
@@ -15,7 +15,7 @@ dependencies = [
 name = "calmdesk-setup"
 version = "0.1.0"
 dependencies = [
- "widget-engine",
+ "widgine",
  "windows",
 ]
 
@@ -45,7 +45,7 @@ dependencies = [
 name = "media"
 version = "0.1.0"
 dependencies = [
- "widget-engine",
+ "widgine",
  "windows",
 ]
 
@@ -189,7 +189,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563"
 
 [[package]]
-name = "widget-engine"
+name = "widgine"
 version = "0.1.0"
 dependencies = [
  "roxmltree",

@@ -8,13 +8,13 @@ jobs:
   test:
     runs-on: windows-latest
     steps:
-      # Calmdesk builds against widget-engine checked out next to it.
+      # Calmdesk builds against widgine checked out next to it.
       - uses: actions/checkout@v4
         with:
           path: calmdesk
       - uses: actions/checkout@v4
         with:
-          repository: rom5n/widget-engine
+          repository: rom5n/widgine
           path: engine
       - uses: dtolnay/rust-toolchain@stable
         with:

@@ -1,6 +1,6 @@
 //! Live data for the built-in widgets that show this PC: battery, radios, photos, notes, tasks,
 //! weather, world clock and screen time. A worker thread reads it; the UI thread copies it into the widgets, because
-//! `widget_engine::set` belongs to the engine's thread.
+//! `widgine::set` belongs to the engine's thread.
 
 use std::collections::HashMap;
 use std::hash::BuildHasher;
@@ -94,7 +94,7 @@ fn send(m: Msg) {
 /// UI thread: hands the new values to the widgets.
 extern "system" fn tick(_: HWND, _: u32, _: usize, _: u32) {
     for (id, k, v) in std::mem::take(&mut *OUT.lock().unwrap()) {
-        widget_engine::set(&id, &k, &v);
+        widgine::set(&id, &k, &v);
     }
 }
 
@@ -135,7 +135,7 @@ pub fn action(id: &str, action: &str) -> bool {
 /// What the gallery previews show.
 pub fn sample(package_id: &str) -> Values {
     let own = |v: &[(&str, &str)]| v.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect::<Values>();
-    let tr = widget_engine::tr;
+    let tr = widgine::tr;
     match package_id.strip_prefix("dev.widget-engine.").unwrap_or("") {
         "timer" => return own(&[("time", "05:00"), ("dash", "263.9"), ("color", "#FF9500"), ("focus", "on")]),
         "pomodoro" => return own(&[("time", "25:00"), ("dash", "263.9"), ("color", "#FF6347"), ("focus", "on")]),
@@ -355,7 +355,7 @@ impl Worker {
                     // Saved in the language of that time: the city's name in today's.
                     let name = city.rsplit('/').next().unwrap_or(&city);
                     if let Some(&(known, ..)) = WEATHER_CITIES.iter().find(|c| c.0 == name) {
-                        old.iter_mut().filter(|(k, _)| k == "city").for_each(|(_, v)| *v = widget_engine::tr(known).to_string());
+                        old.iter_mut().filter(|(k, _)| k == "city").for_each(|(_, v)| *v = widgine::tr(known).to_string());
                     }
                     let wait = Duration::from_secs(if old.is_empty() { 15 } else { 120 });
                     let at = Instant::now().checked_sub(WEATHER_EVERY - wait).unwrap_or_else(Instant::now);
@@ -648,8 +648,8 @@ fn world_values(id: &str) -> Values {
         let sign = if off < 0 { '−' } else { '+' };
         v.push((format!("a{i}"), format!("{:.1}", (h % 12.0) * 30.0 + m * 0.5 + s / 120.0)));
         v.push((format!("m{i}"), format!("{:.1}", m * 6.0 + s * 0.1)));
-        v.push((format!("n{i}"), widget_engine::tr(city).into()));
-        v.push((format!("d{i}"), widget_engine::tr(day).into()));
+        v.push((format!("n{i}"), widgine::tr(city).into()));
+        v.push((format!("d{i}"), widgine::tr(day).into()));
         v.push((format!("o{i}"), format!("{sign}{}:{:02}", off.abs() / 60, off.abs() % 60)));
     }
     v
@@ -895,7 +895,7 @@ fn weekday(date: &str) -> String {
     let mut parts = date.split('-').map(|p| p.parse::<u16>().unwrap_or(1));
     let st = SYSTEMTIME { wYear: parts.next().unwrap_or(2000), wMonth: parts.next().unwrap_or(1), wDay: parts.next().unwrap_or(1), ..Default::default() };
     let mut buf = [0u16; 32];
-    let n = unsafe { GetDateFormatEx(widget_engine::locale(), ENUM_DATE_FORMATS_FLAGS(0), Some(&st), w!("ddd"), Some(&mut buf), None) };
+    let n = unsafe { GetDateFormatEx(widgine::locale(), ENUM_DATE_FORMATS_FLAGS(0), Some(&st), w!("ddd"), Some(&mut buf), None) };
     String::from_utf16_lossy(&buf[..(n.max(1) - 1) as usize])
 }
 
@@ -943,7 +943,7 @@ fn fetch_weather(city: &str) -> Option<Values> {
     // Values are "Europe/Paris": the menu groups them by region.
     let name = city.rsplit('/').next().unwrap_or(city);
     let (name, lat, lon) = match WEATHER_CITIES.iter().find(|c| c.0 == name) {
-        Some(&(c, lat, lon)) => (widget_engine::tr(c).to_string(), lat.to_string(), lon.to_string()),
+        Some(&(c, lat, lon)) => (widgine::tr(c).to_string(), lat.to_string(), lon.to_string()),
         None => {
             let geo = curl("https://ipinfo.io/json")?;
             let (lat, lon) = field(&geo, "loc")?.split_once(',')?;

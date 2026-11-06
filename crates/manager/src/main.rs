@@ -24,7 +24,7 @@ use std::rc::Rc;
 use std::sync::Mutex;
 
 use catalog::Entry;
-use widget_engine::{Engine, MenuItem, tr};
+use widgine::{Engine, MenuItem, tr};
 use windows::Win32::Foundation::*;
 use windows::Win32::Graphics::Gdi::{MONITOR_DEFAULTTOPRIMARY, MonitorFromPoint};
 use windows::Win32::System::Threading::CreateMutexW;
@@ -185,7 +185,7 @@ fn save_instances() {
 }
 
 fn is_media(dir: &Path) -> bool {
-    widget_engine::package_info(dir).is_ok_and(|i| i.id.starts_with(MEDIA_ID))
+    widgine::package_info(dir).is_ok_and(|i| i.id.starts_with(MEDIA_ID))
 }
 
 /// "dev.widget-engine.clock" -> "dev-widget-engine-clock-2": the first number not in use.
@@ -225,12 +225,12 @@ fn feed_media(id: &str) {
 fn add(entry: &Entry, drag: bool) {
     let id = new_id(&entry.info.id);
     let opened = if drag {
-        widget_engine::drag_out(&id, &entry.dir)
+        widgine::drag_out(&id, &entry.dir)
     } else {
         // Each click lands a bit lower right, so new widgets do not hide each other.
         let n = INSTANCES.with_borrow(|v| v.len()) % 6;
         let (x, y) = centered(entry.info.size, 28.0 * n as f32, 28.0 * n as f32);
-        widget_engine::open(&id, &entry.dir, x, y)
+        widgine::open(&id, &entry.dir, x, y)
     };
     if let Err(e) = opened {
         eprintln!("calmdesk: {}: {e}", entry.dir.display());
@@ -248,7 +248,7 @@ fn add(entry: &Entry, drag: bool) {
 fn open_gallery() {
     let entries = ENTRIES.with(|e| e.clone());
     let (x, y) = centered(gallery::SIZE, 0.0, 0.0);
-    widget_engine::open_panel(gallery::ID, gallery::Gallery::new(entries, Rc::new(add)), x, y);
+    widgine::open_panel(gallery::ID, gallery::Gallery::new(entries, Rc::new(add)), x, y);
     // Apps may have installed widgets since the last look.
     start_scan();
 }
@@ -273,7 +273,7 @@ fn scanned() {
     });
     if changed {
         // The gallery rebuilds on any data change.
-        widget_engine::set(gallery::ID, "catalog", &format!("{:?}", std::time::Instant::now()));
+        widgine::set(gallery::ID, "catalog", &format!("{:?}", std::time::Instant::now()));
     }
 }
 
@@ -316,11 +316,11 @@ fn request(r: shell::Request) {
             "gallery" => open_gallery(),
             "hide" | "show" => {
                 HIDDEN.set(action == "hide");
-                widget_engine::set_hidden(HIDDEN.get());
+                widgine::set_hidden(HIDDEN.get());
             }
             "remove-all" => {
                 for (id, _) in INSTANCES.take() {
-                    widget_engine::close(&id);
+                    widgine::close(&id);
                     media::remove(&id);
                     feeds::remove(&id);
                     remote::remove(&id);
@@ -331,7 +331,7 @@ fn request(r: shell::Request) {
             "fullscreen" => {
                 let hide = setting("fullscreen").as_deref() == Some("show");
                 set_setting("fullscreen", if hide { "hide" } else { "show" });
-                widget_engine::set_fullscreen_hiding(hide);
+                widgine::set_fullscreen_hiding(hide);
             }
             "export" => {
                 let dir = backup_dir();
@@ -417,7 +417,7 @@ fn main() -> windows::core::Result<()> {
         unsafe { std::env::set_var("WIDGET_LANG", lang) };
     }
     if setting("fullscreen").as_deref() == Some("show") {
-        widget_engine::set_fullscreen_hiding(false);
+        widgine::set_fullscreen_hiding(false);
     }
     let mut engine = Engine::new();
     engine.keep_alive();
@@ -435,7 +435,7 @@ fn main() -> windows::core::Result<()> {
                 if is_media(&dir) {
                     feed_media(&id);
                 }
-                if let Ok(info) = widget_engine::package_info(&dir) {
+                if let Ok(info) = widgine::package_info(&dir) {
                     feeds::add(&id, &info.id);
                     remote::add(&id, &info.id, &dir);
                 }

@@ -4,12 +4,12 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use widget_engine::windows::Win32::Graphics::Direct2D::Common::*;
-use widget_engine::windows::Win32::Graphics::Direct2D::*;
-use widget_engine::windows::Win32::Graphics::DirectWrite::*;
-use widget_engine::windows::core::Result;
-use widget_engine::windows_numerics::Vector2;
-use widget_engine::{Background, Card, Customization, Event, LayerId, Scene, Widget, rgba};
+use widgine::windows::Win32::Graphics::Direct2D::Common::*;
+use widgine::windows::Win32::Graphics::Direct2D::*;
+use widgine::windows::Win32::Graphics::DirectWrite::*;
+use widgine::windows::core::Result;
+use widgine::windows_numerics::Vector2;
+use widgine::{Background, Card, Customization, Event, LayerId, Scene, Widget, rgba};
 
 use crate::catalog::Entry;
 
@@ -19,14 +19,11 @@ pub const SIZE: (f32, f32) = (800.0, 540.0);
 /// Layout, DIPs.
 const SIDE: f32 = 200.0;
 const ROW: f32 = 34.0;
-const LIST_TOP: f32 = 76.0;
-/// The app logo in the top left corner: x, y, size.
-const LOGO: (f32, f32, f32) = (22.0, 20.0, 36.0);
-/// The search field right of the logo: left, top, right, bottom.
-/// As tall as the logo.
-const SEARCH: (f32, f32, f32, f32) = (68.0, LOGO.1, SIDE - 14.0, LOGO.1 + LOGO.2);
+const LIST_TOP: f32 = 64.0;
+/// The search field above the categories, as wide as their rows: left, top, right, bottom.
+const SEARCH: (f32, f32, f32, f32) = (14.0, 20.0, SIDE - 14.0, 48.0);
 const CONTENT_X: f32 = SIDE + 24.0;
-const GRID_TOP: f32 = 76.0;
+const GRID_TOP: f32 = 64.0;
 const BOTTOM: f32 = SIZE.1 - 20.0;
 const COLUMNS: usize = 3;
 const GAP: f32 = 16.0;
@@ -176,11 +173,7 @@ impl Gallery {
                 Ok(())
             };
 
-            // Sidebar: the logo, categories with icons, a hairline on its edge.
-            // ponytail: decodes the 256 px logo on every redraw (about 1 ms); keep the bitmap if hover redraws lag.
-            let logo = widget_engine::load_image(ctx, if theme.dark { include_bytes!("../assets/logo-dark.png").as_slice() } else { include_bytes!("../assets/logo.png") })?;
-            let (lx, ly, ls) = LOGO;
-            ctx.DrawBitmap(&logo, Some(&rect(lx, ly, lx + ls, ly + ls)), 1.0, D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC, None, None);
+            // Sidebar: categories with icons, a hairline on its edge.
             ctx.FillRectangle(&rect(SIDE, 20.0, SIDE + 1.0, SIZE.1 - 20.0), &brush(ink(0.08))?);
 
             // Search field: a pill with a magnifier, the query and a caret.
@@ -196,7 +189,7 @@ impl Gallery {
             let tx = sl + 26.0;
             let tr_ = if self.query.is_empty() { sr - 10.0 } else { sr - 26.0 };
             if self.query.is_empty() {
-                text(widget_engine::tr("Search"), &hint, tx + 4.0, st, tr_, sb, ink(0.42))?;
+                text(widgine::tr("Search"), &hint, tx + 4.0, st, tr_, sb, ink(0.42))?;
             } else {
                 text(&self.query, &hint, tx, st, tr_, sb, fg)?;
                 // The clear button.
@@ -214,7 +207,7 @@ impl Gallery {
             let cx = (tx + m.widthIncludingTrailingWhitespace + 1.0).min(tr_);
             ctx.FillRectangle(&rect(cx, my - 8.0, cx + 1.4, my + 8.0), &brush(theme.accent)?);
             let total = entries.len();
-            let rows = std::iter::once((widget_engine::tr("All widgets").to_string(), total)).chain(cats.iter().cloned());
+            let rows = std::iter::once((widgine::tr("All widgets").to_string(), total)).chain(cats.iter().cloned());
             for (k, (label, n)) in rows.enumerate() {
                 let t = LIST_TOP + k as f32 * ROW;
                 let selected = k == self.selected;
@@ -236,7 +229,7 @@ impl Gallery {
             }
 
             // Header: hint and the close button.
-            text(widget_engine::tr("Drag a widget to your desktop, or click to add it."), &hint, CONTENT_X, 18.0, SIZE.0 - 60.0, 44.0, ink(0.5))?;
+            text(widgine::tr("Drag a widget to your desktop, or click to add it."), &hint, CONTENT_X, 18.0, SIZE.0 - 60.0, 44.0, ink(0.5))?;
             let (cx, cy, r) = CLOSE;
             let ring = D2D1_ELLIPSE { point: Vector2 { X: cx, Y: cy }, radiusX: r, radiusY: r };
             ctx.FillEllipse(&ring, &brush(fill(if hover == Some(Hit::Close) { 0.16 } else { 0.08 }))?);
@@ -252,7 +245,7 @@ impl Gallery {
             // Grid: tile backgrounds and labels. The previews go on top, see `build`.
             let tw = Self::tile_w();
             if lines.is_empty() {
-                text(widget_engine::tr("No widgets found"), &hint, CONTENT_X + 2.0, GRID_TOP, SIZE.0 - 24.0, GRID_TOP + 30.0, ink(0.5))?;
+                text(widgine::tr("No widgets found"), &hint, CONTENT_X + 2.0, GRID_TOP, SIZE.0 - 24.0, GRID_TOP + 30.0, ink(0.5))?;
             }
             let mut y = GRID_TOP;
             for line in lines.iter().skip(self.first) {
@@ -362,7 +355,7 @@ impl Widget for Gallery {
                 let hit = self.hit_at(x, y);
                 match self.press.take() {
                     Some((h, ..)) if Some(h) == hit => match h {
-                        Hit::Close => widget_engine::close(ID),
+                        Hit::Close => widgine::close(ID),
                         Hit::Search => {}
                         Hit::Clear => {
                             self.query.clear();
@@ -377,7 +370,7 @@ impl Widget for Gallery {
                             let e = self.entries.borrow()[i].clone();
                             (self.add)(&e, false);
                             // The new widget lands in the middle of the screen, under this panel.
-                            widget_engine::close(ID);
+                            widgine::close(ID);
                         }
                     },
                     _ => {}
@@ -417,7 +410,7 @@ impl Widget for Gallery {
 
 /// A 16 DIP line icon centered at (cx, cy): "" for all widgets, else by category name.
 unsafe fn category_icon(ctx: &ID2D1DeviceContext, d2d: &ID2D1Factory1, category: &str, cx: f32, cy: f32, b: &ID2D1SolidColorBrush) -> Result<()> {
-    let tr = widget_engine::tr;
+    let tr = widgine::tr;
     let p = |x: f32, y: f32| Vector2 { X: cx + x, Y: cy + y };
     let round = |l: f32, t: f32, r: f32, bt: f32, rad: f32| D2D1_ROUNDED_RECT { rect: rect(cx + l, cy + t, cx + r, cy + bt), radiusX: rad, radiusY: rad };
     let dot = |x: f32, y: f32, r: f32| D2D1_ELLIPSE { point: p(x, y), radiusX: r, radiusY: r };

@@ -90,7 +90,7 @@ fn save_art(props: &GlobalSystemMediaTransportControlsSessionMediaProperties, ke
 }
 
 fn nothing_playing() -> Snapshot {
-    let v = [("title", widget_engine::tr("Not Playing")), ("artist", ""), ("source", ""), ("art", ""), ("playing", ""), ("timed", "0"), ("elapsed", ""), ("remaining", ""), ("position", "0"), ("bar", "0"), ("controls", "0.35")];
+    let v = [("title", widgine::tr("Not Playing")), ("artist", ""), ("source", ""), ("art", ""), ("playing", ""), ("timed", "0"), ("elapsed", ""), ("remaining", ""), ("position", "0"), ("bar", "0"), ("controls", "0.35")];
     Snapshot { values: v.iter().map(|(k, v)| (*k, v.to_string())).collect() }
 }
 
@@ -179,7 +179,7 @@ impl Reader {
         // -1 = length never known for this track: no bar.
         let progress = if end > 0 { pos as f32 / end as f32 } else { -1.0 };
         let values = vec![
-            ("title", if title.is_empty() { widget_engine::tr("Unknown|track").into() } else { title }),
+            ("title", if title.is_empty() { widgine::tr("Unknown|track").into() } else { title }),
             ("artist", artist),
             ("source", app_name(&s.SourceAppUserModelId()?.to_string())),
             ("art", self.track.1.clone()),
@@ -224,7 +224,7 @@ thread_local! {
 }
 
 fn set_all(key: &'static str, value: &str) {
-    IDS.with_borrow(|ids| ids.iter().for_each(|id| widget_engine::set(id, key, value)));
+    IDS.with_borrow(|ids| ids.iter().for_each(|id| widgine::set(id, key, value)));
     SHOWN.with_borrow_mut(|s| match s.iter_mut().find(|(k, _)| *k == key) {
         Some(kv) => kv.1 = value.into(),
         None => s.push((key, value.into())),
@@ -275,7 +275,7 @@ pub fn start() {
 /// Feeds the widget `id` (a widgets/media package) from now on.
 pub fn add(id: &str) {
     IDS.with_borrow_mut(|ids| ids.push(id.into()));
-    SHOWN.with_borrow(|s| s.iter().for_each(|(k, v)| widget_engine::set(id, k, v)));
+    SHOWN.with_borrow(|s| s.iter().for_each(|(k, v)| widgine::set(id, k, v)));
 }
 
 pub fn remove(id: &str) {

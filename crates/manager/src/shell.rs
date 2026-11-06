@@ -9,7 +9,7 @@ use windows::Win32::UI::Shell::*;
 use windows::Win32::UI::WindowsAndMessaging::*;
 use windows::core::*;
 
-/// Also the address apps send their widgets' values to: `widget_engine::host::HOST_CLASS`.
+/// Also the address apps send their widgets' values to: `widgine::host::HOST_CLASS`.
 pub const TRAY_CLASS: PCWSTR = w!("Calmdesk.Tray");
 /// Tray icon notifications.
 const WM_TRAY: u32 = WM_APP + 50;
@@ -28,18 +28,18 @@ pub enum Request {
     Scanned,
     /// The `action` of the picked tray menu item.
     Menu(String),
-    /// A `widget_engine::host` message from another app: its window, the fields.
+    /// A `widgine::host` message from another app: its window, the fields.
     Remote(HWND, Vec<String>),
 }
 
 thread_local! {
     static HANDLER: std::cell::RefCell<Option<Box<dyn Fn(Request)>>> = const { std::cell::RefCell::new(None) };
-    static MENU: std::cell::RefCell<Option<Box<dyn Fn() -> Vec<widget_engine::MenuItem>>>> = const { std::cell::RefCell::new(None) };
+    static MENU: std::cell::RefCell<Option<Box<dyn Fn() -> Vec<widgine::MenuItem>>>> = const { std::cell::RefCell::new(None) };
 }
 
 /// Creates the hidden tray window and the icon. `menu` builds the right-click menu each time;
 /// `handler` gets clicks and picks.
-pub fn create_tray(handler: impl Fn(Request) + 'static, menu: impl Fn() -> Vec<widget_engine::MenuItem> + 'static) -> Result<HWND> {
+pub fn create_tray(handler: impl Fn(Request) + 'static, menu: impl Fn() -> Vec<widgine::MenuItem> + 'static) -> Result<HWND> {
     HANDLER.set(Some(Box::new(handler)));
     MENU.set(Some(Box::new(menu)));
     unsafe {
@@ -104,7 +104,7 @@ extern "system" fn tray_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARA
                         let (x, y) = ((wparam.0 & 0xFFFF) as i16 as i32, ((wparam.0 >> 16) & 0xFFFF) as i16 as i32);
                         let _ = SetForegroundWindow(hwnd);
                         let items = MENU.with_borrow(|m| m.as_ref().map(|f| f()).unwrap_or_default());
-                        if let Some(action) = widget_engine::popup_menu(x, y, &items) {
+                        if let Some(action) = widgine::popup_menu(x, y, &items) {
                             handle(Request::Menu(action));
                         }
                     }
@@ -116,10 +116,10 @@ extern "system" fn tray_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARA
                 handle(Request::Gallery);
                 LRESULT(0)
             }
-            WM_COPYDATA => match widget_engine::host::decode(lparam) {
+            WM_COPYDATA => match widgine::host::decode(lparam) {
                 Some(fields) => {
                     handle(Request::Remote(HWND(wparam.0 as _), fields));
-                    LRESULT(widget_engine::host::VERSION as isize)
+                    LRESULT(widgine::host::VERSION as isize)
                 }
                 None => LRESULT(0),
             },
@@ -172,7 +172,7 @@ pub fn set_autostart(on: bool) {
 /// shortcut, the uninstall entry, the saved widgets, and (after this process exits) the
 /// install folder.
 pub fn uninstall() {
-    let question = HSTRING::from(widget_engine::tr("Uninstall Calmdesk and remove its widgets?"));
+    let question = HSTRING::from(widgine::tr("Uninstall Calmdesk and remove its widgets?"));
     let answer = unsafe { MessageBoxW(None, &question, &HSTRING::from(APP_NAME), MB_YESNO | MB_ICONQUESTION) };
     if answer != IDYES {
         return;

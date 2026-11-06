@@ -85,7 +85,7 @@ fn day(start: &str) -> String {
     let n = |a: usize, b: usize| start[a..b].parse().unwrap_or(1);
     let st = SYSTEMTIME { wYear: n(0, 4), wMonth: n(4, 6), wDay: n(6, 8), ..Default::default() };
     let mut buf = [0u16; 40];
-    let len = unsafe { GetDateFormatEx(widget_engine::locale(), ENUM_DATE_FORMATS_FLAGS(0), Some(&st), w!("ddd, d MMM"), Some(&mut buf), None) };
+    let len = unsafe { GetDateFormatEx(widgine::locale(), ENUM_DATE_FORMATS_FLAGS(0), Some(&st), w!("ddd, d MMM"), Some(&mut buf), None) };
     String::from_utf16_lossy(&buf[..(len.max(1) - 1) as usize])
 }
 

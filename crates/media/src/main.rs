@@ -2,12 +2,12 @@
 //!
 //! Run: cargo run -p media --release
 
-use widget_engine::Engine;
+use widgine::Engine;
 use windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CXSCREEN};
 
 const ID: &str = "media";
 
-fn main() -> widget_engine::windows::core::Result<()> {
+fn main() -> widgine::windows::core::Result<()> {
     let mut engine = Engine::new();
     let x = unsafe { GetSystemMetrics(SM_CXSCREEN) } - 400;
     engine.load(ID, concat!(env!("CARGO_MANIFEST_DIR"), "/../../widgets/media"), x, 460)?;

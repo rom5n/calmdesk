@@ -150,7 +150,7 @@ fn show(c: &Clock) {
     SENT.with_borrow_mut(|sent| {
         for (k, v) in c.values() {
             if sent.get(&(c.id.clone(), k)) != Some(&v) {
-                widget_engine::set(&c.id, k, &v);
+                widgine::set(&c.id, k, &v);
                 sent.insert((c.id.clone(), k), v);
             }
         }

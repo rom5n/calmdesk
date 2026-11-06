@@ -9,8 +9,8 @@
 
 use std::path::{Path, PathBuf};
 
-use widget_engine::windows_numerics::Vector2;
-use widget_engine::{Background, Card, Customization, Event, LayerId, Scene, Transition, Widget, rgba};
+use widgine::windows_numerics::Vector2;
+use widgine::{Background, Card, Customization, Event, LayerId, Scene, Transition, Widget, rgba};
 use windows::Win32::Graphics::Direct2D::Common::*;
 use windows::Win32::Graphics::Direct2D::*;
 use windows::Win32::Graphics::DirectWrite::*;
@@ -131,7 +131,7 @@ fn shortcut(exe: &Path) -> Result<()> {
         let link: IShellLinkW = CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER)?;
         link.SetPath(&HSTRING::from(exe.as_os_str()))?;
         link.SetWorkingDirectory(&HSTRING::from(exe.parent().unwrap().as_os_str()))?;
-        link.SetDescription(&HSTRING::from(widget_engine::tr("Desktop widgets for Windows")))?;
+        link.SetDescription(&HSTRING::from(widgine::tr("Desktop widgets for Windows")))?;
         link.cast::<IPersistFile>()?.Save(&HSTRING::from(programs.join(format!("{APP}.lnk")).as_os_str()), true)
     }
 }
@@ -179,11 +179,11 @@ impl Setup {
 
     fn click(&mut self, hit: Hit) {
         match (hit, &self.step) {
-            (Hit::Close, _) => widget_engine::close(ID),
+            (Hit::Close, _) => widgine::close(ID),
             (Hit::Button, Step::Done) => {
                 // A second start of the manager opens its gallery.
                 let _ = std::process::Command::new(install_dir().join(EXE)).spawn();
-                widget_engine::close(ID);
+                widgine::close(ID);
             }
             (Hit::Button, _) => {
                 // ponytail: installs on the UI thread (a few MB, well under a second), so no "Installing…" state.
@@ -213,9 +213,9 @@ impl Setup {
         let label = fmt(14.0, DWRITE_FONT_WEIGHT_SEMI_BOLD)?;
         let small = fmt(11.0, DWRITE_FONT_WEIGHT_NORMAL)?;
         let (button, note) = match &self.step {
-            Step::Ready => (widget_engine::tr("Install"), String::new()),
-            Step::Done => (widget_engine::tr("Open"), widget_engine::tr("Installed").to_string()),
-            Step::Failed(e) => (widget_engine::tr("Install"), format!("{} {e}", widget_engine::tr("Installation failed:"))),
+            Step::Ready => (widgine::tr("Install"), String::new()),
+            Step::Done => (widgine::tr("Open"), widgine::tr("Installed").to_string()),
+            Step::Failed(e) => (widgine::tr("Install"), format!("{} {e}", widgine::tr("Installation failed:"))),
         };
         let failed = matches!(self.step, Step::Failed(_));
         let hover = self.hover;
@@ -231,13 +231,13 @@ impl Setup {
                 match part {
                     LOGO => {
                         // The app logo, light or dark to match the theme.
-                        let logo = widget_engine::load_image(ctx, if theme.dark { include_bytes!("../../manager/assets/logo-dark.png").as_slice() } else { include_bytes!("../../manager/assets/logo.png") })?;
+                        let logo = widgine::load_image(ctx, if theme.dark { include_bytes!("../../manager/assets/logo-dark.png").as_slice() } else { include_bytes!("../../manager/assets/logo.png") })?;
                         let (s, l, t) = (104.0, (SIZE.0 - 104.0) / 2.0, 30.0);
                         ctx.DrawBitmap(&logo, Some(&D2D_RECT_F { left: l, top: t, right: l + s, bottom: t + s }), 1.0, D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC, None, None);
                     }
                     TEXT => {
                         text(APP, &title, 24.0, 142.0, SIZE.0 - 24.0, 174.0, fg)?;
-                        text(widget_engine::tr("Desktop widgets for Windows"), &body, 24.0, 176.0, SIZE.0 - 24.0, 196.0, ink(0.55))?;
+                        text(widgine::tr("Desktop widgets for Windows"), &body, 24.0, 176.0, SIZE.0 - 24.0, 196.0, ink(0.55))?;
                         if !note.is_empty() {
                             let c = if failed { rgba(1.0, 0.35, 0.35, 1.0) } else { ink(0.55) };
                             text(&note, &small, 24.0, 204.0, SIZE.0 - 24.0, 228.0, c)?;
@@ -337,7 +337,7 @@ impl Widget for Setup {
 }
 
 fn main() -> Result<()> {
-    let engine = widget_engine::Engine::new();
+    let engine = widgine::Engine::new();
     // Middle of the primary monitor.
     let (w, h) = unsafe {
         use windows::Win32::UI::WindowsAndMessaging::*;
@@ -345,6 +345,6 @@ fn main() -> Result<()> {
     };
     let s = unsafe { windows::Win32::UI::HiDpi::GetDpiForSystem() } as f32 / 96.0;
     let (x, y) = (w / 2 - (SIZE.0 * s / 2.0) as i32, h / 2 - (SIZE.1 * s / 2.0) as i32);
-    widget_engine::open_panel(ID, Setup { step: Step::Ready, hover: None, press: None, layers: Vec::new(), shown: 0 }, x, y);
+    widgine::open_panel(ID, Setup { step: Step::Ready, hover: None, press: None, layers: Vec::new(), shown: 0 }, x, y);
     engine.run()
 }

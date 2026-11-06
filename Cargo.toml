@@ -16,3 +16,8 @@ strip = true
 [profile.release.package.windows]
 opt-level = 1
 codegen-units = 16
+
+# Builds against the widgine checkout next to this repository (see README, Building). Remove
+# this to build against the published crate.
+[patch.crates-io]
+widgine = { path = "../engine/crates/engine" }

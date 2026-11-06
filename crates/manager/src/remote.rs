@@ -1,5 +1,5 @@
 //! Widgets from other apps' packages. Their apps feed them `{app.*}` values and get their
-//! clicks through `widget_engine::host`: `WM_COPYDATA` to the tray window, see that module.
+//! clicks through `widgine::host`: `WM_COPYDATA` to the tray window, see that module.
 
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -32,7 +32,7 @@ pub fn add(id: &str, package: &str, dir: &Path) {
         return;
     }
     WIDGETS.with_borrow_mut(|w| w.push((id.into(), package.into())));
-    VALUES.with_borrow(|v| v.get(package).into_iter().flatten().for_each(|(k, val)| widget_engine::set(id, k, val)));
+    VALUES.with_borrow(|v| v.get(package).into_iter().flatten().for_each(|(k, val)| widgine::set(id, k, val)));
 }
 
 pub fn remove(id: &str) {
@@ -51,7 +51,7 @@ pub fn message(from: HWND, fields: &[String]) {
                     keys.insert(key.clone(), value.clone());
                 }
             });
-            WIDGETS.with_borrow(|w| w.iter().filter(|(_, p)| p == package).for_each(|(id, _)| widget_engine::set(id, key, value)));
+            WIDGETS.with_borrow(|w| w.iter().filter(|(_, p)| p == package).for_each(|(id, _)| widgine::set(id, key, value)));
             package
         }
         _ => return,
@@ -65,7 +65,7 @@ pub fn message(from: HWND, fields: &[String]) {
 pub fn action(id: &str, action: &str, tray: HWND) -> bool {
     let Some(package) = WIDGETS.with_borrow(|w| w.iter().find(|(i, _)| i == id).map(|(_, p)| p.clone())) else { return false };
     if let Some(app) = APPS.with_borrow(|a| a.get(&package).copied()) {
-        widget_engine::host::send(HWND(app as _), tray, &["action", &package, id, action]);
+        widgine::host::send(HWND(app as _), tray, &["action", &package, id, action]);
     }
     true
 }
@@ -73,6 +73,6 @@ pub fn action(id: &str, action: &str, tray: HWND) -> bool {
 /// Tells running apps to send their values again: after this app starts.
 pub fn announce() {
     unsafe {
-        let _ = PostMessageW(Some(HWND_BROADCAST), widget_engine::host::started_message(), WPARAM(0), LPARAM(0));
+        let _ = PostMessageW(Some(HWND_BROADCAST), widgine::host::started_message(), WPARAM(0), LPARAM(0));
     }
 }

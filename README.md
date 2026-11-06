@@ -86,20 +86,20 @@ Portuguese, Polish, Chinese, Japanese and Korean. 14 hand-picked fonts are inclu
 Make your widgets for Calmdesk, so users find them in the one gallery they already use,
 with the same look and the same settings menu as every other widget.
 
-1. Build the package with [widget-engine](https://github.com/rom5n/widget-engine): a folder
+1. Build the package with [widgine](https://github.com/rom5n/widgine): a folder
    with `widget.toml` and `layout.xml`. The engine's
-   [guide](https://github.com/rom5n/widget-engine/blob/main/docs/guide.md) goes step by step.
+   [guide](https://github.com/rom5n/widgine/blob/main/docs/guide.md) goes step by step.
 2. Give it a unique reverse-domain `id` (`com.yourname.weather`), keep `engine = "^0.1"`, and
    allow the customizations that make sense (`size`, `background`, `theme`, ...), so it fits
    in with the built-in widgets.
-3. Feed live values from your app with `widget_engine::host` (Rust) or `we_host_set` (C);
+3. Feed live values from your app with `widgine::host` (Rust) or `we_host_set` (C);
    Calmdesk shows the widget in its own process and passes clicks back to your app.
 4. Install it to `%LOCALAPPDATA%\Widgets\<package>`, `%ProgramData%\Widgets\<package>`, or
-   register its folder under `HKCU\Software\WidgetEngine\Packages`. Calmdesk finds it the next
+   register its folder under `HKCU\Software\Widgine\Packages`. Calmdesk finds it the next
    time the gallery opens.
 
-Details: [Getting into the Calmdesk gallery](https://github.com/rom5n/widget-engine/blob/main/docs/authoring.md#getting-into-the-calmdesk-gallery)
-and [Publishing a package](https://github.com/rom5n/widget-engine/blob/main/docs/authoring.md#publishing-a-package).
+Details: [Getting into the Calmdesk gallery](https://github.com/rom5n/widgine/blob/main/docs/authoring.md#getting-into-the-calmdesk-gallery)
+and [Publishing a package](https://github.com/rom5n/widgine/blob/main/docs/authoring.md#publishing-a-package).
 
 ## Settings and data
 
@@ -113,16 +113,18 @@ Google Fonts under the SIL Open Font License, with their licenses next to them.
 
 ## Building
 
-Calmdesk builds against a checkout of widget-engine next to this one:
+Calmdesk depends on [widgine](https://crates.io/crates/widgine) (formerly widget-engine). The
+`[patch.crates-io]` section in `Cargo.toml` builds it from a checkout next to this one, so
+engine changes show up right away; remove that section to build against the published crate.
 
 ```
 some-folder/
-  engine/     https://github.com/rom5n/widget-engine
+  engine/     https://github.com/rom5n/widgine
   calmdesk/   this repository
 ```
 
 ```bash
-git clone https://github.com/rom5n/widget-engine.git engine
+git clone https://github.com/rom5n/widgine.git engine
 ```
 
 ```bash

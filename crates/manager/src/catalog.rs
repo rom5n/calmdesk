@@ -2,7 +2,8 @@
 //! other apps installed.
 //!
 //! Apps make their widgets known in one of these ways:
-//! - a value under `HKCU` or `HKLM\Software\WidgetEngine\Packages` (any name) whose data is a
+//! - a value under `HKCU` or `HKLM\Software\Widgine\Packages` (or the older
+//!   `Software\WidgetEngine\Packages`), any name, whose data is a
 //!   package directory, or a directory of packages;
 //! - a package directory in `%LOCALAPPDATA%\Widgets` or `%ProgramData%\Widgets`;
 //! - a package anywhere in the app's install folder, up to a few levels deep, under Program
@@ -14,7 +15,7 @@ use std::collections::HashSet;
 use std::os::windows::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 
-use widget_engine::{PackageInfo, package_info};
+use widgine::{PackageInfo, package_info};
 use windows::Win32::System::Registry::*;
 
 #[derive(Clone, Debug)]
@@ -29,8 +30,8 @@ impl Entry {
     /// Gallery section, in the display language.
     pub fn category(&self) -> String {
         match self.info.category.as_str() {
-            "" => widget_engine::tr("Other").into(),
-            c => widget_engine::tr(c).into(),
+            "" => widgine::tr("Other").into(),
+            c => widgine::tr(c).into(),
         }
     }
 }
@@ -55,7 +56,7 @@ pub fn builtins() -> Vec<Entry> {
         .filter(|d| d.join("widget.toml").is_file())
         .filter_map(|dir| {
             let info = package_info(&dir).map_err(|e| eprintln!("calmdesk: {e}")).ok()?;
-            Some(Entry { dir, info, source: widget_engine::tr("Built-in").into() })
+            Some(Entry { dir, info, source: widgine::tr("Built-in").into() })
         })
         .collect();
     // Like `merge`: by name, variants of one widget in folder order.
@@ -68,7 +69,9 @@ pub fn builtins() -> Vec<Entry> {
 pub fn scan() -> Vec<PathBuf> {
     let mut roots: Vec<(PathBuf, usize)> = Vec::new();
     for hive in [HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE] {
-        roots.extend(registered(hive).into_iter().map(|d| (d, 1)));
+        for key in [windows::core::w!(r"Software\Widgine\Packages"), windows::core::w!(r"Software\WidgetEngine\Packages")] {
+            roots.extend(registered(hive, key).into_iter().map(|d| (d, 1)));
+        }
     }
     let env = |k: &str| std::env::var_os(k).map(PathBuf::from);
     for (var, sub, depth) in [
@@ -162,12 +165,13 @@ fn expand(s: &str) -> String {
     out
 }
 
-/// Directories registered under `Software\WidgetEngine\Packages`.
-fn registered(hive: HKEY) -> Vec<PathBuf> {
+/// Directories registered under `key`: `Software\Widgine\Packages`, or the name from before
+/// the engine was renamed.
+fn registered(hive: HKEY, key_name: windows::core::PCWSTR) -> Vec<PathBuf> {
     let mut out = Vec::new();
     unsafe {
         let mut key = HKEY::default();
-        if RegOpenKeyExW(hive, windows::core::w!(r"Software\WidgetEngine\Packages"), None, KEY_READ, &mut key).is_err() {
+        if RegOpenKeyExW(hive, key_name, None, KEY_READ, &mut key).is_err() {
             return out;
         }
         for i in 0.. {
@@ -212,7 +216,7 @@ fn app_folder(dir: &Path) -> String {
         // %LOCALAPPDATA%\Widgets\<app>\<package>, and the same under ProgramData.
         .or_else(|| after("widgets"))
         .filter(|s| !s.eq_ignore_ascii_case(dir.file_name().map(|f| f.to_string_lossy().into_owned()).unwrap_or_default().as_str()))
-        .unwrap_or_else(|| widget_engine::tr("Other").into())
+        .unwrap_or_else(|| widgine::tr("Other").into())
 }
 
 #[cfg(test)]
@@ -224,7 +228,7 @@ mod tests {
         assert_eq!(app_folder(Path::new(r"C:\Program Files\Acme Weather\widgets\forecast")), "Acme Weather");
         assert_eq!(app_folder(Path::new(r"C:\Users\a\AppData\Local\Programs\Notes\w\todo")), "Notes");
         assert_eq!(app_folder(Path::new(r"C:\Users\a\AppData\Local\Widgets\Demo App\spark")), "Demo App");
-        assert_eq!(app_folder(Path::new(r"C:\Users\a\AppData\Local\Widgets\spark")), widget_engine::tr("Other"));
+        assert_eq!(app_folder(Path::new(r"C:\Users\a\AppData\Local\Widgets\spark")), widgine::tr("Other"));
     }
 
     #[test]

@@ -7,7 +7,7 @@ publish = false
 description = "Calmdesk: tray app with a widget gallery; hosts widgets and restores them at sign-in"
 
 [dependencies]
-widget-engine = { path = "../../../engine/crates/engine" }
+widgine = "0.1"
 media = { path = "../media" }
 
 [dependencies.windows]

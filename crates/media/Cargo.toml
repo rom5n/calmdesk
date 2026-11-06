@@ -7,7 +7,7 @@ publish = false
 description = "Now Playing widget: shows and controls whatever app plays media"
 
 [dependencies]
-widget-engine = { path = "../../../engine/crates/engine" }
+widgine = "0.1"
 
 [dependencies.windows]
 version = "0.62"
