@@ -69,9 +69,13 @@ A "Community" group in the gallery, listing packages from a public index.
   only when its tile is shown or picked (curl, 20 MB cap, `sha256` checked with certutil) and
   unpacked into `data_dir()\store\packages\<sha256>` for a live preview. Downloads that left
   the index or are older than 30 days are deleted. Offline: the cached index.
-- **Gallery:** the sidebar groups categories under "Built-in", "Other apps" and "Community"
-  captions (no captions while all widgets are built-in). A store tile shows the author. Clicking
-  or dragging it installs it through `install.rs`, then adds it like any widget.
+- **Gallery:** a Community button at the bottom of the sidebar opens the store's list on the
+  right (scrolls, grouped by category, most downloaded first, search works inside it).
+  Widgets the user installed into `%LOCALAPPDATA%\Widgets` (store, `.cdwidget`, remixes) have
+  their own "Installed" row; right-click one to delete it (its folder goes to the Recycle Bin,
+  its widgets leave the desktop). The other rows are grouped under "Built-in" and "Other apps".
+  Clicking or dragging a store tile installs it, then adds it like any widget. The index is
+  fetched at most once an hour.
 - **Updates:** a store package newer than the installed one (`version`) shows in Community
   with "Update available"; picking it replaces the installed one. "Update all" not done.
 - **Engine:** `widget.toml` gained optional `author`, `version`, `homepage`, `icon` (schema,

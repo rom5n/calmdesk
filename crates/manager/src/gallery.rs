@@ -32,10 +32,15 @@ const GAP: f32 = 16.0;
 const TILE_H: f32 = 170.0;
 const HEADER_H: f32 = 34.0;
 const CLOSE: (f32, f32, f32) = (SIZE.0 - 30.0, 30.0, 12.0);
+/// The Community button at the bottom of the sidebar: left, top, right, bottom.
+const COMMUNITY_BUTTON: (f32, f32, f32, f32) = (14.0, BOTTOM - 34.0, SIDE - 14.0, BOTTOM);
+/// `selected` while the Community list shows.
+const COMMUNITY: usize = usize::MAX;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Hit {
     Category(usize),
+    Community,
     /// Index into the entries.
     Tile(usize),
     Close,
@@ -62,7 +67,7 @@ pub struct Gallery {
     entries: Rc<RefCell<Vec<Entry>>>,
     /// Adds a widget: (entry, true = follow the pointer, false = place it).
     add: Rc<dyn Fn(&Entry, bool)>,
-    /// 0: all widgets. Else a category, 1-based in `categories()`.
+    /// 0: all widgets. Else a sidebar row, 1-based in `categories()`, or `COMMUNITY`.
     selected: usize,
     /// First visible line of the grid.
     first: usize,
@@ -81,14 +86,25 @@ impl Gallery {
         Self { entries, add, selected: 0, first: 0, hover: None, press: None, hits: Vec::new(), base: None, at_end: true, query: String::new() }
     }
 
-    /// (group, category, widget count): grouped by where the widgets come from, then by name.
+    /// The sidebar row of an entry: its group and category. Installed widgets share one row;
+    /// store widgets have none (they are under the Community button).
+    fn row_of(e: &Entry) -> Option<(Kind, String)> {
+        match e.kind {
+            Kind::Community => None,
+            Kind::Installed => Some((Kind::Installed, widgine::tr("Installed").into())),
+            k => Some((k, e.category())),
+        }
+    }
+
+    /// Sidebar rows (group, label, widget count): grouped by where the widgets come from, then
+    /// by name.
     fn categories(&self) -> Vec<(Kind, String, usize)> {
         let mut cats: Vec<(Kind, String, usize)> = Vec::new();
         for e in self.entries.borrow().iter() {
-            let c = e.category();
-            match cats.iter_mut().find(|(k, n, _)| *k == e.kind && *n == c) {
+            let Some((kind, c)) = Self::row_of(e) else { continue };
+            match cats.iter_mut().find(|(k, n, _)| *k == kind && *n == c) {
                 Some(x) => x.2 += 1,
-                None => cats.push((e.kind, c, 1)),
+                None => cats.push((kind, c, 1)),
             }
         }
         cats.sort_by_key(|(k, n, _)| (*k, n.to_lowercase()));
@@ -103,7 +119,8 @@ impl Gallery {
         let grouped = cats.iter().any(|c| c.0 != Kind::Builtin);
         let groups = if grouped { cats.windows(2).filter(|w| w[0].0 != w[1].0).count() + 1 } else { 0 };
         let need = (cats.len() + 1) as f32 * ROW + groups as f32 * CAPTION;
-        let k = ((BOTTOM - LIST_TOP) / need).min(1.0);
+        // Above the Community button.
+        let k = ((COMMUNITY_BUTTON.1 - 10.0 - LIST_TOP) / need).min(1.0);
         let (row, caption) = (ROW * k, CAPTION * k);
         let mut tops = vec![LIST_TOP];
         let mut captions = Vec::new();
@@ -125,22 +142,42 @@ impl Gallery {
         [e.info.name.as_str(), &e.category(), &e.info.variant, &e.source].iter().any(|s| s.to_lowercase().contains(&q))
     }
 
-    /// Grid lines for the selected category: per-category headers in "All widgets".
+    /// Grid lines for the selected category: per-category headers in "All widgets" and in the
+    /// Community list.
     fn lines(&self) -> Vec<Line> {
         let entries = self.entries.borrow();
-        let cats = self.categories();
         let mut lines = Vec::new();
+        if self.selected == COMMUNITY {
+            let mut cats: Vec<String> = Vec::new();
+            for e in entries.iter().filter(|e| e.kind == Kind::Community) {
+                if !cats.contains(&e.category()) {
+                    cats.push(e.category());
+                }
+            }
+            cats.sort_by_key(|c| c.to_lowercase());
+            for cat in cats {
+                // In the catalog's order: most downloaded first.
+                let ids: Vec<usize> = (0..entries.len()).filter(|&i| entries[i].kind == Kind::Community && entries[i].category() == cat && self.matches(&entries[i])).collect();
+                if !ids.is_empty() {
+                    lines.push(Line::Header(cat));
+                    lines.extend(ids.chunks(COLUMNS).map(|c| Line::Tiles(c.to_vec())));
+                }
+            }
+            return lines;
+        }
+        let cats = self.categories();
         let grouped = cats.iter().any(|c| c.0 != Kind::Builtin);
         for (k, (kind, cat, _)) in cats.iter().enumerate() {
             if self.selected != 0 && self.selected != k + 1 {
                 continue;
             }
-            let ids: Vec<usize> = (0..entries.len()).filter(|&i| entries[i].kind == *kind && entries[i].category() == *cat && self.matches(&entries[i])).collect();
+            let ids: Vec<usize> = (0..entries.len()).filter(|&i| Self::row_of(&entries[i]).is_some_and(|(k, c)| k == *kind && c == *cat) && self.matches(&entries[i])).collect();
             if ids.is_empty() {
                 continue;
             }
             if self.selected == 0 {
-                lines.push(Line::Header(if grouped && *kind != Kind::Builtin { format!("{} · {cat}", group_label(*kind)) } else { cat.clone() }));
+                let group = group_label(*kind);
+                lines.push(Line::Header(if grouped && *kind != Kind::Builtin && !group.is_empty() { format!("{group} · {cat}") } else { cat.clone() }));
             }
             lines.extend(ids.chunks(COLUMNS).map(|c| Line::Tiles(c.to_vec())));
         }
@@ -233,14 +270,34 @@ impl Gallery {
             layout.GetMetrics(&mut m)?;
             let cx = (tx + m.widthIncludingTrailingWhitespace + 1.0).min(tr_);
             ctx.FillRectangle(&rect(cx, my - 8.0, cx + 1.4, my + 8.0), &brush(theme.accent)?);
-            // Featured widgets are copies: count each widget once.
-            let total = entries.iter().filter(|e| e.kind != Kind::Featured).count();
+            // Featured widgets are copies, store widgets are under Community: count each widget
+            // the user has once.
+            let total = entries.iter().filter(|e| !matches!(e.kind, Kind::Featured | Kind::Community)).count();
+            // The Community button.
+            let (bl, bt, br, bb) = COMMUNITY_BUTTON;
+            let on = self.selected == COMMUNITY;
+            if on {
+                pill(bl, bt, br, bb, 10.0, theme.accent)?;
+            } else {
+                pill(bl, bt, br, bb, 10.0, fill(if hover == Some(Hit::Community) { 0.14 } else { 0.08 }))?;
+            }
+            let c = if on { rgba(1.0, 1.0, 1.0, 1.0) } else { fg };
+            category_icon(ctx, &d2d, widgine::tr("Community"), 37.0, (bt + bb) / 2.0, &brush(c)?)?;
+            text(widgine::tr("Community"), &body, 54.0, bt, SIDE - 52.0, bb, c)?;
+            let n = entries.iter().filter(|e| e.kind == Kind::Community).count();
+            text(&n.to_string(), &count, SIDE - 60.0, bt, SIDE - 26.0, bb, if on { rgba(1.0, 1.0, 1.0, 0.8) } else { ink(0.45) })?;
             let (tops, captions, row) = Self::sidebar(&cats);
             for (t, label) in &captions {
                 let h = row / ROW * CAPTION;
+                if label.is_empty() {
+                    ctx.FillRectangle(&rect(26.0, *t + h / 2.0, SIDE - 26.0, *t + h / 2.0 + 1.0), &brush(ink(0.1))?);
+                }
                 text(label, &small, 26.0, *t + h - 22.0, SIDE - 26.0, *t + h - 4.0, ink(0.45))?;
             }
             let rows = std::iter::once((widgine::tr("All widgets").to_string(), total)).chain(cats.iter().map(|(_, c, n)| (c.clone(), *n)));
+            if self.selected == COMMUNITY {
+                text(widgine::tr("Click a widget to install it and add it to your desktop."), &hint, CONTENT_X, 18.0, SIZE.0 - 60.0, 44.0, ink(0.5))?;
+            }
             for (k, (label, n)) in rows.enumerate() {
                 let t = tops[k];
                 let selected = k == self.selected;
@@ -263,7 +320,9 @@ impl Gallery {
             }
 
             // Header: hint and the close button.
-            text(widgine::tr("Drag a widget to your desktop, or click to add it."), &hint, CONTENT_X, 18.0, SIZE.0 - 60.0, 44.0, ink(0.5))?;
+            if self.selected != COMMUNITY {
+                text(widgine::tr("Drag a widget to your desktop, or click to add it."), &hint, CONTENT_X, 18.0, SIZE.0 - 60.0, 44.0, ink(0.5))?;
+            }
             let (cx, cy, r) = CLOSE;
             let ring = D2D1_ELLIPSE { point: Vector2 { X: cx, Y: cy }, radiusX: r, radiusY: r };
             ctx.FillEllipse(&ring, &brush(fill(if hover == Some(Hit::Close) { 0.16 } else { 0.08 }))?);
@@ -279,7 +338,8 @@ impl Gallery {
             // Grid: tile backgrounds and labels. The previews go on top, see `build`.
             let tw = Self::tile_w();
             if lines.is_empty() {
-                text(widgine::tr("No widgets found"), &hint, CONTENT_X + 2.0, GRID_TOP, SIZE.0 - 24.0, GRID_TOP + 30.0, ink(0.5))?;
+                let empty = if self.selected == COMMUNITY && self.query.is_empty() { widgine::tr("No community widgets yet") } else { widgine::tr("No widgets found") };
+                text(empty, &hint, CONTENT_X + 2.0, GRID_TOP, SIZE.0 - 24.0, GRID_TOP + 30.0, ink(0.5))?;
             }
             let mut y = GRID_TOP;
             for line in lines.iter().skip(self.first) {
@@ -328,10 +388,14 @@ impl Widget for Gallery {
     fn build(&mut self, scene: &mut Scene) -> Result<()> {
         self.base = Some(scene.add_layer(0.0, 0.0, SIZE.0, SIZE.1)?);
         let cats = self.categories();
-        self.selected = self.selected.min(cats.len());
+        if self.selected != COMMUNITY {
+            self.selected = self.selected.min(cats.len());
+        }
         // Hit areas and previews of what is visible.
         let (tops, _, row) = Self::sidebar(&cats);
         self.hits = tops.into_iter().enumerate().map(|(k, t)| (rect(14.0, t, SIDE - 14.0, t + row - 2.0), Hit::Category(k))).collect();
+        let (bl, bt, br, bb) = COMMUNITY_BUTTON;
+        self.hits.push((rect(bl, bt, br, bb), Hit::Community));
         let (sl, st, sr, sb) = SEARCH;
         if !self.query.is_empty() {
             self.hits.push((rect(sr - 24.0, st, sr, sb), Hit::Clear));
@@ -402,6 +466,10 @@ impl Widget for Gallery {
                             (self.selected, self.first) = (k, 0);
                             scene.request_rebuild();
                         }
+                        Hit::Community => {
+                            (self.selected, self.first) = (COMMUNITY, 0);
+                            scene.request_rebuild();
+                        }
                         Hit::Tile(i) => {
                             let e = self.entries.borrow()[i].clone();
                             (self.add)(&e, false);
@@ -439,7 +507,8 @@ impl Widget for Gallery {
                     '\r' => return Ok(()),
                     c => self.query.push(c),
                 }
-                (self.selected, self.first) = (0, 0);
+                // A search looks through all widgets, or through the Community list there.
+                (self.selected, self.first) = (if self.selected == COMMUNITY { COMMUNITY } else { 0 }, 0);
                 scene.request_rebuild();
             }
             // The catalog changed (scan finished).
@@ -517,6 +586,19 @@ unsafe fn category_icon(ctx: &ID2D1DeviceContext, d2d: &ID2D1Factory1, category:
             sink.Close()?;
             ctx.DrawGeometry(&arc, b, w, &stroke);
             ctx.DrawRoundedRectangle(&round(-7.0, 0.5, 7.5, 7.0, 3.25), b, w, &stroke);
+        } else if category == tr("Installed") {
+            // An arrow into a tray.
+            ctx.DrawLine(p(0.0, -7.0), p(0.0, 2.5), b, w, &stroke);
+            ctx.DrawLine(p(-3.5, -1.0), p(0.0, 2.5), b, w, &stroke);
+            ctx.DrawLine(p(3.5, -1.0), p(0.0, 2.5), b, w, &stroke);
+            ctx.DrawLine(p(-7.0, 2.5), p(-7.0, 6.5), b, w, &stroke);
+            ctx.DrawLine(p(-7.0, 6.5), p(7.0, 6.5), b, w, &stroke);
+            ctx.DrawLine(p(7.0, 6.5), p(7.0, 2.5), b, w, &stroke);
+        } else if category == tr("Community") {
+            // A globe.
+            ctx.DrawEllipse(&dot(0.0, 0.0, 7.2), b, w, &stroke);
+            ctx.DrawEllipse(&D2D1_ELLIPSE { point: p(0.0, 0.0), radiusX: 3.2, radiusY: 7.2 }, b, w, &stroke);
+            ctx.DrawLine(p(-7.0, 0.0), p(7.0, 0.0), b, w, &stroke);
         } else if category == tr("Other") {
             for x in [-5.5, 0.0, 5.5] {
                 ctx.FillEllipse(&dot(x, 0.0, 1.6), b);
@@ -532,6 +614,8 @@ unsafe fn category_icon(ctx: &ID2D1DeviceContext, d2d: &ID2D1Factory1, category:
 
 fn group_label(kind: Kind) -> &'static str {
     match kind {
+        // A divider, no caption: the row says "Installed".
+        Kind::Installed => "",
         Kind::Featured => widgine::tr("Featured"),
         Kind::Builtin => widgine::tr("Built-in"),
         Kind::App => widgine::tr("Other apps"),
@@ -541,4 +625,28 @@ fn group_label(kind: Kind) -> &'static str {
 
 fn rect(left: f32, top: f32, right: f32, bottom: f32) -> D2D_RECT_F {
     D2D_RECT_F { left, top, right, bottom }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn installed_row_and_community_list() {
+        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../widgets/clock");
+        let info = widgine::package_info(&dir).unwrap();
+        let entry = |kind: Kind| Entry { dir: dir.clone(), info: info.clone(), source: String::new(), kind, store: None };
+        let entries = Rc::new(RefCell::new(vec![entry(Kind::Builtin), entry(Kind::Installed), entry(Kind::Installed), entry(Kind::Community)]));
+        let mut g = Gallery::new(entries, Rc::new(|_: &Entry, _: bool| {}));
+        let rows = g.categories();
+        assert_eq!(rows.len(), 2, "{rows:?}");
+        assert_eq!((rows[1].0, rows[1].1.as_str(), rows[1].2), (Kind::Installed, widgine::tr("Installed"), 2));
+        // All widgets: the built-in and both installed ones, not the store's.
+        let count = |lines: &[Line]| lines.iter().map(|l| if let Line::Tiles(t) = l { t.len() } else { 0 }).sum::<usize>();
+        assert_eq!(count(&g.lines()), 3);
+        g.selected = COMMUNITY;
+        let lines = g.lines();
+        assert_eq!(count(&lines), 1);
+        assert!(matches!(&lines[1], Line::Tiles(t) if t == &vec![3]));
+    }
 }

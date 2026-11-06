@@ -56,14 +56,15 @@ fn dir() -> PathBuf {
     crate::data_dir().join("store")
 }
 
-/// Fetches the index and the shelves at most once a day and deletes downloads that left the
+/// Fetches the index and the shelves at most once an hour and deletes downloads that left the
 /// index or were not used for a month. Offline: what was fetched before. Slow: call it off the
 /// UI thread.
 pub fn refresh() -> (Vec<Item>, Vec<Shelf>) {
     let dir = dir();
     let index = dir.join("index.txt");
     let featured = dir.join("featured.txt");
-    if age(&index) >= DAY {
+    // Hourly: a 1 KB file from release downloads, which have no API rate limit.
+    if age(&index) >= Duration::from_secs(60 * 60) {
         let content = |t: &str| t.lines().filter(|l| !l.trim().is_empty() && !l.starts_with('#')).count();
         let _ = std::fs::create_dir_all(&dir);
         // Only whole files: a "Not Found" page is no index.

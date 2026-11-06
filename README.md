@@ -51,8 +51,8 @@ The installer is not code-signed yet, so Windows SmartScreen may warn the first 
 
 - **A beautiful gallery.** Browse every widget by category, search by name, then drag one onto
   the desktop or simply click it.
-- **Community widgets.** Widgets made by other people, one click to install, with a Featured
-  shelf of hand-picked ones. Double-click a `.cdwidget` file to install it too.
+- **Community widgets.** The Community button lists widgets made by other people: one click
+  installs one. Installed widgets get their own category, and a right-click deletes them. Double-click a `.cdwidget` file to install it too.
 - **Remix any widget.** Right-click a widget in the gallery, choose Remix, and change its look
   in Notepad: it updates on the desktop as you save.
 - **Profiles.** Keep a Work and a Gaming desktop and switch between them from the tray.

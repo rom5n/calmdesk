@@ -36,7 +36,13 @@ pub enum Kind {
     /// A copy of another entry, shown on a Featured shelf.
     Featured,
     Builtin,
+    /// Packages of other apps.
     App,
+    /// Packages the user installed into `%LOCALAPPDATA%\Widgets`: from the store, a .cdwidget,
+    /// or a remix. These can be deleted from the gallery.
+    Installed,
+    /// The store's list: shown under the gallery's Community button, not with the widgets
+    /// the user has.
     Community,
 }
 
@@ -108,22 +114,28 @@ pub fn scan() -> Vec<PathBuf> {
 }
 
 /// Built-ins first, then the scanned packages that load, without duplicates (same directory
-/// or same package id), then store packages that are not installed or are newer than the
-/// installed one. Sorted by name; store packages by downloads. Then copies of the widgets on
-/// today's Featured shelves, the shelf title as their category.
+/// or same package id), then every store package: the installed copy when it is as new,
+/// else the store's. Sorted by name; store packages by downloads. Then copies of the widgets
+/// on today's Featured shelves, the shelf title as their category.
 pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<crate::store::Item>, shelves: &[crate::store::Shelf]) -> Vec<Entry> {
     let canon = |p: &Path| std::fs::canonicalize(p).unwrap_or_else(|_| p.to_path_buf());
     let mut seen_dirs: HashSet<PathBuf> = builtins.iter().map(|e| canon(&e.dir)).collect();
     let mut seen_ids: HashSet<String> = builtins.iter().map(|e| e.info.id.clone()).collect();
     let mut all = builtins;
+    let installed_root = canon(&crate::install::widgets_dir());
     for dir in scanned {
         if !seen_dirs.insert(canon(&dir)) {
             continue;
         }
         match package_info(&dir) {
             Ok(info) if seen_ids.insert(info.id.clone()) => {
-                let source = if info.author.is_empty() { app_folder(&dir) } else { info.author.clone() };
-                all.push(Entry { dir, info, source, kind: Kind::App, store: None });
+                let installed = canon(&dir).parent() == Some(installed_root.as_path());
+                let source = match () {
+                    _ if !info.author.is_empty() => info.author.clone(),
+                    _ if installed => widgine::tr("Installed").into(),
+                    _ => app_folder(&dir),
+                };
+                all.push(Entry { dir, info, source, kind: if installed { Kind::Installed } else { Kind::App }, store: None });
             }
             Ok(_) => {}
             Err(e) => eprintln!("calmdesk: skipping {}: {e}", dir.display()),
@@ -147,8 +159,13 @@ pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<crate::stor
                 sources: Vec::new(),
             },
         };
-        let source = match all.iter().find(|e| e.info.id == info.id) {
-            Some(e) if !crate::update::newer(&info.version, &e.info.version) => continue,
+        let have = all.iter().find(|e| e.kind != Kind::Community && e.info.id == info.id).cloned();
+        let source = match &have {
+            // Up to date: the store lists the installed copy, picking it just adds it.
+            Some(e) if !crate::update::newer(&info.version, &e.info.version) => {
+                all.push(Entry { source: widgine::tr("Installed").into(), kind: Kind::Community, store: None, ..e.clone() });
+                continue;
+            }
             Some(_) => widgine::tr("Update available").into(),
             None if item.author.is_empty() => format!("↓{}", short(item.downloads)),
             None => format!("{} · ↓{}", item.author, short(item.downloads)),
@@ -160,7 +177,7 @@ pub fn merge(builtins: Vec<Entry>, scanned: Vec<PathBuf>, store: Vec<crate::stor
     for shelf in shelves {
         for id in &shelf.ids {
             // The installed widget when there is one, else the store's.
-            let found = all.iter().filter(|e| e.kind != Kind::Featured && e.info.id == *id).min_by_key(|e| e.kind == Kind::Community);
+            let found = all.iter().filter(|e| e.kind != Kind::Featured && e.info.id == *id).min_by_key(|e| e.kind == Kind::Community && e.store.is_some());
             if let Some(e) = found.cloned() {
                 all.push(Entry { kind: Kind::Featured, info: widgine::PackageInfo { category: shelf.title.clone(), ..e.info.clone() }, ..e });
             }

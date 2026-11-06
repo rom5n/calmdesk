@@ -26,6 +26,7 @@ mod update;
 use std::cell::{Cell, RefCell};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
+use std::os::windows::ffi::OsStrExt;
 use std::sync::Mutex;
 
 use catalog::Entry;
@@ -425,7 +426,21 @@ fn show_tile_menu() {
     let Some(entry) = TILE.take() else { return };
     let mut pt = POINT::default();
     let _ = unsafe { windows::Win32::UI::WindowsAndMessaging::GetCursorPos(&mut pt) };
-    if widgine::popup_menu(pt.x, pt.y, &[MenuItem::new(tr("Remix"), "remix")]).as_deref() == Some("remix") {
+    // Only what the user installed into the widgets folder can be deleted here.
+    let canon = |p: &Path| std::fs::canonicalize(p).unwrap_or_else(|_| p.to_path_buf());
+    let deletable = entry.store.is_none() && canon(&entry.dir).parent() == Some(canon(&install::widgets_dir()).as_path());
+    let mut items = vec![MenuItem::new(tr("Remix"), "remix")];
+    if deletable {
+        items.push(MenuItem::new(tr("Delete"), "delete").danger());
+    }
+    let picked = widgine::popup_menu(pt.x, pt.y, &items);
+    if picked.as_deref() == Some("delete") {
+        let q = format!("{}\n\n{}", tr("Delete this widget? Its widgets on the desktop are removed too."), entry.info.name);
+        if message(&q, MB_YESNO | MB_ICONQUESTION) == IDYES {
+            delete_package(&entry.dir);
+        }
+    }
+    if picked.as_deref() == Some("remix") {
         match remix::remix(&entry.dir) {
             Ok(layout) => {
                 let _ = std::process::Command::new("notepad.exe").arg(&layout).spawn();
@@ -438,6 +453,37 @@ fn show_tile_menu() {
                 message(&format!("{}\n\n{e}", tr("Remix")), MB_OK | MB_ICONWARNING);
             }
         }
+    }
+}
+
+/// Takes an installed package off the desktop and moves its folder to the Recycle Bin.
+fn delete_package(dir: &Path) {
+    let placed: Vec<String> = INSTANCES.with_borrow(|v| v.iter().filter(|(_, d)| d == dir).map(|(id, _)| id.clone()).collect());
+    for id in placed {
+        widgine::close(&id);
+        on_action(&id, "delete");
+    }
+    if let Err(e) = recycle(dir) {
+        eprintln!("calmdesk: delete {}: {e}", dir.display());
+        message(&format!("{}\n{}", tr("Could not delete:"), dir.display()), MB_OK | MB_ICONWARNING);
+    }
+    start_scan();
+}
+
+/// Moves `path` to the Recycle Bin, so a deleted remix can come back.
+fn recycle(path: &Path) -> std::result::Result<(), String> {
+    use windows::Win32::UI::Shell::{FO_DELETE, FOF_ALLOWUNDO, FOF_NOCONFIRMATION, FOF_NOERRORUI, FOF_SILENT, SHFILEOPSTRUCTW, SHFileOperationW};
+    // Double-NUL terminated.
+    let from: Vec<u16> = path.as_os_str().encode_wide().chain([0, 0]).collect();
+    let mut op = SHFILEOPSTRUCTW {
+        wFunc: FO_DELETE,
+        pFrom: windows::core::PCWSTR(from.as_ptr()),
+        fFlags: (FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT).0 as u16,
+        ..Default::default()
+    };
+    match unsafe { SHFileOperationW(&mut op) } {
+        0 if !op.fAnyOperationsAborted.as_bool() => Ok(()),
+        r => Err(format!("SHFileOperation {r}")),
     }
 }
 
